@@ -2,36 +2,49 @@ from numba import jit
 from scipy.misc import imsave
 import gradient, mandelbrot, cactus, julia
 import time
-from math import ceil
+from math import ceil, floor
 
 class Renderer():
-	def __init__(self, xResMax = 512, yResMax = 512, xResMin = 8, yResMin = 8):
+	def __init__(self, xResMax = 1024, yResMax = 1024, xResMin = 2, yResMin = 2):
 		self.xResMax = xResMax
 		self.yResMax = yResMax
 		self.xResMin = xResMin
 		self.yResMin = yResMin
 
-		self.cam = Camera(xResMax, yResMax)
+		self.cam = Camera(xResMax, yResMax, xPos = -.5)
 
-		self.renderImage()
-		self.saveImage('test.png')
+		weightImage = [[mandelbrot.renderWire(self.cam.convertX(x*2), self.cam.convertY(y*2)) for x in range(floor(self.xResMax/2))] for y in range(floor(self.yResMax/2))]
+		imsave('weightImage.png', weightImage)
 
-	def saveImage(self, name):
-		imsave(name, self.image)
+		imsave('dynamic.png', self.renderQuadImage(weightImage))
+
+		imsave('fullRes.png', self.renderImage())
 
 	def renderImage(self):
 		t = time.clock()
 
 		# The list comprehension is faster, but less flexible
 		#self.image = [[mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), 100) for x in range(self.xResMax)] for y in range(self.yResMax)]
-		self.image = []
+		image = []
 		for y in range(self.yResMax):
 			row = []
 			for x in range(self.xResMax):
-				row.append(gradient.render(self.cam.convertX(x), self.cam.convertY(y)))
-			self.image.append(row)
+				row.append(mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y)))
+			image.append(row)
 
 		print("Render time was " + str(time.clock()-t) + " seconds.")
+		return(image)
+
+	def renderQuadImage(self, weightImage):
+		t = time.clock()
+		image = [[0 for x in range(self.xResMax)] for y in range(self.yResMax)]
+		quadSize = floor(self.xResMax/self.xResMin)
+		for y in range(self.yResMin):
+			for x in range(self.xResMin):
+				q = Quadtree((x*quadSize, y*quadSize), quadSize, weightImage)
+				q.render(image, self.cam)
+		print("Dynamic render time was " + str(time.clock()-t) + " seconds.")
+		return(image)
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
 	def __init__(self, xRes, yRes, xPos = 0, yPos = 0, zoom = 2):
@@ -40,41 +53,49 @@ class Camera(): # This class is responsible for handling the conversion from pix
 		self.xPos = xPos
 		self.yPos = yPos
 		self.zoom = zoom
-		self.aspectRatio = self.xRes/self.yRes
 
 	def convertPos(self, x, y):
 		return((convertX(x), convertY(y)))
 
 	def convertX(self, x):
-		return((x-self.xRes/2)*self.zoom*self.aspectRatio/self.xRes+self.xPos)
+		return((x-self.xRes/2)*self.zoom/self.xRes+self.xPos)
 
 	def convertY(self, y):
-		return((y-self.yRes/2)*self.zoom/self.aspectRatio/self.yRes-self.yPos)
+		return((y-self.yRes/2)*self.zoom/self.yRes-self.yPos)
 
 class Quadtree():
-	def __init__(self, pos, size):
+	def __init__(self, pos, size, weightImage):
 		self.children = []
 		self.pos = pos
 		self.size = size
-
-	def render(self):
-		if not self.children:
-			half = self.size/2
-			#change this line to update the appropriate pixels of the image instead of returning
-			return(gradient.render(self.pos[0]+half, self.pos[1]+half))
-		for c in self.children:
-			c.render()
-
-	def subdivide(self):
+		# Check if the weightImage asks for more subdivision
 		if size > 1:
-			half = self.size/2
-			x, y = self.pos
-			self.children.append(Quadtree(self.pos, half))
-			self.children.append(Quadtree((x+half, y), half))
-			self.children.append(Quadtree((x, y+half), half))
-			self.children.append(Quadtree((x+half, y+half), half))
-			return(True)
-		return(False)
+			for x in range(floor(self.pos[0]/2), floor((self.pos[0]+self.size)/2)):
+				for y in range(floor(self.pos[1]/2), floor((self.pos[1]+self.size)/2)):
+					if weightImage[y][x] > 0:
+						self.subdivide(weightImage)
+						return
+
+	def render(self, image, cam):
+		if not self.children: # If this quad is not subdivided
+			half = floor(self.size/2)
+			#change this line to update the appropriate pixels of the image instead of returning
+			#return(gradient.render(self.pos[0]+half, self.pos[1]+half))
+			col = mandelbrot.render(cam.convertX(self.pos[0]+half), cam.convertY(self.pos[1]+half))
+			for x in range(self.pos[0], self.pos[0]+self.size):
+				for y in range(self.pos[1], self.pos[1]+self.size):
+					image[y][x] = col
+		else:
+			for c in self.children:
+				c.render(image, cam)
+
+	def subdivide(self, weightImage):
+		half = floor(self.size/2)
+		x, y = self.pos
+		self.children.append(Quadtree(self.pos, half, weightImage))
+		self.children.append(Quadtree((x+half, y), half, weightImage))
+		self.children.append(Quadtree((x, y+half), half, weightImage))
+		self.children.append(Quadtree((x+half, y+half), half, weightImage))
 
 class BoundingBox():
 	def __init__(self, coords, size):
