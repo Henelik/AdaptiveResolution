@@ -1,10 +1,10 @@
 from numba import jit
 from scipy.misc import imsave
-import gradient
+import gradient, mandelbrot, cactus, julia
 import time
 
 class Renderer():
-	def __init__(self, xResMax = 2048, yResMax = 2048, xResMin = 8, yResMin = 8):
+	def __init__(self, xResMax = 512, yResMax = 512, xResMin = 8, yResMin = 8):
 		self.xResMax = xResMax
 		self.yResMax = yResMax
 		self.xResMin = xResMin
@@ -21,27 +21,26 @@ class Renderer():
 	def renderImage(self):
 		t = time.clock()
 
-		self.image = [[gradient.render(x/self.xResMax, y/self.yResMax) for x in range(self.xResMax)] for y in range(self.yResMax)]
-
-		#self.image = []
-		#for y in range(self.yResMax):
-		#	row = []
-		#	for x in range(self.xResMax):
-		#		row.append(gradient.render(x/self.xResMax, y/self.yResMax))
-		#	self.image.append(row)
+		self.image = [[gradient.render(self.cam.convertX(x), self.cam.convertY(y)) for x in range(self.xResMax)] for y in range(self.yResMax)]
 
 		print("Render time was " + str(time.clock()-t) + " seconds.")
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
-	def __init__(self, xRes, yRes, xPos = 0, yPos = 0, zoom = 2):
+	def __init__(self, xRes, yRes, xPos = 0, yPos = 0, zoom = 4):
 		self.xRes = xRes
 		self.yRes = yRes
 		self.xPos = xPos
 		self.yPos = yPos
 		self.zoom = zoom
+		self.aspectRatio = self.xRes/self.yRes
 
-	def convertPos(x, y):
-		aspectRatio = xRes/yRes
-		return((x+xRes/2)*zoom*aspectRatio, (y+yRes/2)*zoom/aspectRatio)
+	def convertPos(self, x, y):
+		return((x+self.xPos-self.xRes/2)*self.zoom*self.aspectRatio/self.xRes, (y+self.yPos-self.yRes/2)*self.zoom/self.aspectRatio/self.yRes)
+
+	def convertX(self, x):
+		return((x+self.xPos-self.xRes/2)*self.zoom*self.aspectRatio/self.xRes)
+
+	def convertY(self, y):
+		return((y+self.yPos-self.yRes/2)*self.zoom/self.aspectRatio/self.yRes)
 
 Renderer()
