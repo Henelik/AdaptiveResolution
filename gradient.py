@@ -13,4 +13,6 @@ def render(x, y):
 
 @jit(cache = True)
 def renderWire(x, y):
-	return(x)
+	if x > .95:
+		return(1)
+	return(0)
