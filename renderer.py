@@ -24,16 +24,16 @@ class Renderer():
 		t = time.clock()
 
 		# The list comprehension is faster, but less flexible
-		#self.image = [[mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), 100) for x in range(self.xResMax)] for y in range(self.yResMax)]
-		image = []
-		for y in range(self.yResMax):
-			row = []
-			for x in range(self.xResMax):
-				row.append(mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y)))
-			image.append(row)
+		image = [[mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y)) for x in range(self.xResMax)] for y in range(self.yResMax)]
+		#image = []
+		#for y in range(self.yResMax):
+		#	row = []
+		#	for x in range(self.xResMax):
+		#		row.append(mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y)))
+		#	image.append(row)
 
 		print("Render time was " + str(time.clock()-t) + " seconds.")
-		return(image)
+		return image
 
 	def renderQuadImage(self, weightImage):
 		t = time.clock()
@@ -44,7 +44,7 @@ class Renderer():
 				q = Quadtree((x*quadSize, y*quadSize), quadSize, weightImage)
 				q.render(image, self.cam)
 		print("Dynamic render time was " + str(time.clock()-t) + " seconds.")
-		return(image)
+		return image
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
 	def __init__(self, xRes, yRes, xPos = 0, yPos = 0, zoom = 2):
@@ -58,10 +58,10 @@ class Camera(): # This class is responsible for handling the conversion from pix
 		return((convertX(x), convertY(y)))
 
 	def convertX(self, x):
-		return((x-self.xRes/2)*self.zoom/self.xRes+self.xPos)
+		return (x-self.xRes/2)*self.zoom/self.xRes+self.xPos
 
 	def convertY(self, y):
-		return((y-self.yRes/2)*self.zoom/self.yRes-self.yPos)
+		return (y-self.yRes/2)*self.zoom/self.yRes-self.yPos
 
 class Quadtree():
 	def __init__(self, pos, size, weightImage):

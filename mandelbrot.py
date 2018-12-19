@@ -1,7 +1,7 @@
 from numba import jit
 
 @jit(cache = True)
-def render(zReal, zImag, maxIter = 500):
+def render(zReal, zImag, maxIter = 1000):
 	real = zReal
 	imag = zImag
 	for n in range(maxIter):
@@ -15,12 +15,26 @@ def render(zReal, zImag, maxIter = 500):
 	return 0
 
 @jit(cache = True)
-def renderWire(x, y, maxIter = 20, margin = .5):
-	x1 = x
-	y1 = y
-	for i in range(maxIter):
-		x1, y1 = x1*x1-y1*y1+x, 2*x1*y1+y
-	test = x1*x1+y1*y1
-	if test > 4-margin and test < 4+margin:
-		return(1)
-	return(0)
+def renderWire(zReal, zImag, maxIter = 100, thresh = 50):
+	real = zReal
+	imag = zImag
+	for n in range(maxIter):
+		real2 = real*real
+		imag2 = imag*imag
+		if real2 + imag2 > 4.0:
+			if n > thresh:
+				return n
+			return 0
+		imag = 2 * real * imag + zImag
+		real = real2 - imag2 + zReal
+	return 0
+
+#def renderWire(x, y, maxIter = 20, margin = .5):
+#	x1 = x
+#	y1 = y
+#	for i in range(maxIter):
+#		x1, y1 = x1*x1-y1*y1+x, 2*x1*y1+y
+#	test = x1*x1+y1*y1
+#	if test > 4-margin and test < 4+margin:
+#		return 1
+#	return 0
