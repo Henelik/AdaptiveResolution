@@ -5,7 +5,7 @@ import time
 from math import ceil, floor
 
 class Renderer():
-	def __init__(self, xResMax = 1024, yResMax = 1024, xResMin = 2, yResMin = 2):
+	def __init__(self, xResMax = 4096, yResMax = 4096, xResMin = 2, yResMin = 2):
 		self.xResMax = xResMax
 		self.yResMax = yResMax
 		self.xResMin = xResMin
@@ -13,12 +13,12 @@ class Renderer():
 
 		self.cam = Camera(xResMax, yResMax, xPos = -.5)
 
-		weightImage = [[mandelbrot.renderWire(self.cam.convertX(x*2), self.cam.convertY(y*2)) for x in range(floor(self.xResMax/2))] for y in range(floor(self.yResMax/2))]
+		weightImage = [[mandelbrot.renderDistEst(self.cam.convertX(x*2), self.cam.convertY(y*2)) for x in range(floor(self.xResMax/2))] for y in range(floor(self.yResMax/2))]
 		imsave('weightImage.png', weightImage)
 
-		imsave('dynamic.png', self.renderQuadImage(weightImage))
+		#imsave('dynamic.png', self.renderQuadImage(weightImage))
 
-		imsave('fullRes.png', self.renderImage())
+		#imsave('fullRes.png', self.renderImage())
 
 	def renderImage(self):
 		t = time.clock()
