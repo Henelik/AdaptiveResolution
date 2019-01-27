@@ -12,7 +12,7 @@ class Renderer():
 
 		self.cam = Camera(xRes, yRes, xPos = -.5)
 
-		imsave('dynamic.png', self.renderQuadImage(5000, 100))
+		imsave('dynamic.png', self.renderQuadImage(10000, 100))
 		imsave('fullRes.png', self.renderImage(100))
 
 	def renderImage(self, maxIters):
@@ -32,7 +32,7 @@ class Renderer():
 				else:
 					corn.append(mandelbrot.render(self.cam.convertX(i[0]), self.cam.convertY(i[1]), maxIters))
 					sparseArray[i] = corn[-1]
-			return(sum(corn)/4)
+			return sum(corn)
 
 		t = time.clock()
 		image = [[0 for x in range(self.xRes)] for y in range(self.yRes)]
@@ -44,9 +44,13 @@ class Renderer():
 		Quad(0, s, s, sparseRender(0, s, s)),
 		Quad(s, 0, s, sparseRender(s, 0, s)),
 		Quad(s, s, s, sparseRender(s, s, s))]
+		sortLimit = 0
 		while subdivMax:
 			subdivMax -= 1
-			quadList.sort(key = lambda q: q.priority, reverse = True)
+			sortLimit -= 1
+			if sortLimit <= 0:
+				quadList.sort(key = lambda q: q.priority, reverse = True)
+				sortLimit = floor(len(quadList)/2)
 			current = quadList.pop(0)
 			newSize = floor(current.size/2)
 			for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
@@ -56,7 +60,7 @@ class Renderer():
 				for x in range(q.x, q.x + q.size):
 					image[y][x] = q.color
 		print("Dynamic render time was " + str(time.clock()-t) + " seconds.")
-		return(image)
+		return image
 
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
@@ -86,7 +90,7 @@ class Quad():
 		if size <= 1:
 			self.priority = 0
 		else:
-			self.priority = size*size*color
+			self.priority = size*color
 
 
 Renderer()
