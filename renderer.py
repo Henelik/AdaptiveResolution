@@ -12,7 +12,7 @@ class Renderer():
 
 		self.cam = Camera(xRes, yRes, xPos = -.5)
 
-		imsave('dynamic.png', self.renderQuadImage(2000, 100))
+		imsave('dynamic.png', self.renderQuadImage(5000, 100))
 		imsave('fullRes.png', self.renderImage(100))
 
 	def renderImage(self, maxIters):
@@ -40,22 +40,21 @@ class Renderer():
 
 		s = floor(self.xRes/2)
 		quadList = [
-		Quad(0, 0, 1, sparseRender(0, 0, s)),
-		Quad(0, s, 1, sparseRender(0, s, s)),
-		Quad(s, 0, 1, sparseRender(s, 0, s)),
-		Quad(s, s, 1, sparseRender(s, s, s))]
-		for i in range(subdivMax):
-			quadList.sort(key = lambda q: q.priority)
-			if quadList[0].priority == 0:
-				break
+		Quad(0, 0, s, sparseRender(0, 0, s)),
+		Quad(0, s, s, sparseRender(0, s, s)),
+		Quad(s, 0, s, sparseRender(s, 0, s)),
+		Quad(s, s, s, sparseRender(s, s, s))]
+		while subdivMax:
+			subdivMax -= 1
+			quadList.sort(key = lambda q: q.priority, reverse = True)
 			current = quadList.pop(0)
 			newSize = floor(current.size/2)
 			for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
 				quadList.append(Quad(j[0], j[1], newSize, sparseRender(j[0], j[1], newSize)))
 		for q in quadList:
-			for y in range(q.y, q.y + SIZE_LIST[q.size]):
-				for x in range(q.x, q.x + SIZE_LIST[q.size]):
-					image[y][x] = q.x
+			for y in range(q.y, q.y + q.size):
+				for x in range(q.x, q.x + q.size):
+					image[y][x] = q.color
 		print("Dynamic render time was " + str(time.clock()-t) + " seconds.")
 		return(image)
 
@@ -84,7 +83,10 @@ class Quad():
 		self.y = y
 		self.size = size
 		self.color = color
-		self.priority = size*color
+		if size <= 1:
+			self.priority = 0
+		else:
+			self.priority = size*size*color
 
 
 Renderer()
