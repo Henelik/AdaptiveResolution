@@ -116,14 +116,20 @@ class RealtimeQuadRenderer():
 		Quad(s, s, s, self.sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
 
 	def tickRenderer(self): # subdivide and update the highest priority quad
-			if self.quadList[0].priority == 0:
-				self.quadList.sort(key = lambda q: q.priority, reverse = True)
-				if quadList[0].priority == 0:
+		if self.quadList[0].priority == 0:
+			break
+		current = self.quadList.pop(0)
+		newSize = floor(current.size/2)
+		for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
+			q = Quad(j[0], j[1], newSize, self.sparseRender(j[0], j[1], newSize))
+			inserted = False
+			for k in range(len(self.quadList)):
+				if self.quadList[k].priority <= q.priority:
+					self.quadList.insert(k, q)
+					inserted = True
 					break
-			current = self.quadList.pop(0)
-			newSize = floor(current.size/2)
-			for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
-				self.quadList.append(Quad(j[0], j[1], newSize, self.sparseRender(j[0], j[1], newSize)))
+			if not inserted:
+				self.quadList.append(q)
 
 	def updateImage(self): # update the image (e.g. to display it while rendering) 
 		for i in range(len(self.quadList)): # iterate over index so that index maps can be rendered
