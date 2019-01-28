@@ -6,33 +6,44 @@ from math import ceil, floor
 import itertools
 
 class FullRenderer():
-	def __init__(self, xRes = 512, yRes = 512, AA = 0):
+	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
 		self.xRes = xRes
 		self.yRes = yRes
-		self.AA = min(AA, 7)
+		self.AA = min(max(AA, 0), 8)
+		self.maxIters = maxIters
 
 		self.cam = Camera(xRes, yRes, xPos = -.5)
 
-	def render(self, maxIters):
+	def render(self):
 		t = time.clock()
 
-		image = [[mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), maxIters) for x in range(self.xRes)] for y in range(self.yRes)]
+		#image = [[mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), maxIters) for x in range(self.xRes)] for y in range(self.yRes)]
+		image = [[0 for x in range(self.xRes)] for y in range(self.yRes)]
+		for y in range(self.yRes):
+			for x in range(self.xRes):
+				pix = []
+				AAList = [(x+.5, y+.1), (x+.75, y+.25), (x+.9, y+.)]
+				for i in range(self.AA+1):
+					pix.append(mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), self.maxIters))
+				image[x][y] = sum(pix)
 
 		print("Render time was " + str(time.clock()-t) + " seconds.")
 		return image
 
 class QuadRenderer():
-	def __init__(self, res = 512, AA = 0, disableMaxResAA = True):
+	def __init__(self, res = 512, AA = 0, disableMaxResAA = True, subdivMax = 5000, maxIters = 100):
 		self.res = res
-		self.AA = AA
+		self.AA = min(max(AA, 0), 7)
 		self.disableMaxResAA = disableMaxResAA
+		self.subdivMax = subdivMax
+		self.maxIters = maxIters
 
 		self.cam = Camera(res, res, xPos = -.5)
 
-	def render(self, subdivMax, maxIters):
+	def render(self):
 		def sparseRender(x, y, size):
 			if size == 1 and self.disableMaxResAA:
-				return mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), maxIters)
+				return mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), self.maxIters)
 			half = size/2
 			pixelList = [(x, y), (x+size, y+size), (x+size, y), (x, y+size), (x+half, y+half), (x+half, y), (x, y+half), (x+half, y+size), (x+size, y+half)]
 			pix = []
@@ -42,7 +53,7 @@ class QuadRenderer():
 				if i in sparseArray:
 					pix.append(sparseArray[i])
 				else:
-					pix.append(mandelbrot.render(self.cam.convertX(i[0]), self.cam.convertY(i[1]), maxIters))
+					pix.append(mandelbrot.render(self.cam.convertX(i[0]), self.cam.convertY(i[1]), self.maxIters))
 					sparseArray[i] = pix[-1]
 			return sum(pix)
 
@@ -57,8 +68,9 @@ class QuadRenderer():
 		Quad(s, 0, s, sparseRender(s, 0, s)),
 		Quad(s, s, s, sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
 		sortLimit = 0 # heuristically limit how often we sort to improve
-		while subdivMax:
-			subdivMax -= 1
+		subdivisions = 0
+		while subdivisions < self.subdivMax:
+			subdivisions += 1
 			sortLimit -= 1
 			if sortLimit <= 0 or quadList[0].priority == 0:
 				quadList.sort(key = lambda q: q.priority, reverse = True)
@@ -73,8 +85,8 @@ class QuadRenderer():
 			q = quadList[i]
 			for y in range(q.y, q.y + q.size):
 				for x in range(q.x, q.x + q.size):
-					#image[y][x] = q.color
-					image[y][x] = i
+					image[y][x] = q.color
+					#image[y][x] = i
 		print("Dynamic render time was " + str(time.clock()-t) + " seconds.")
 		return image
 
@@ -117,7 +129,8 @@ class RealtimeQuadRenderer():
 
 	def tickRenderer(self): # subdivide and update the highest priority quad
 		if self.quadList[0].priority == 0:
-			break
+			print("Can't subdivide further!")
+			return
 		current = self.quadList.pop(0)
 		newSize = floor(current.size/2)
 		for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
@@ -168,10 +181,11 @@ class Quad():
 		if size <= 1:
 			self.priority = 0
 		else:
-			self.priority = size*color
+			self.priority = size*size*color
 
 if __name__ == "__main__":
-	fullR = FullRenderer()
-	quadR = QuadRenderer(AA = 2, disableMaxResAA = True)
-	imsave('dynamic.png', quadR.render(100000, 100))
-	imsave('fullRes.png', fullR.render(100))
+	res = 1024
+	fullR = FullRenderer(xRes = res, yRes = res)
+	quadR = QuadRenderer(res = res, AA = 2, disableMaxResAA = False, subdivMax = 15000)
+	imsave('dynamic.png', quadR.render())
+	imsave('fullRes.png', fullR.render())
