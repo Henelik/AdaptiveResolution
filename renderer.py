@@ -5,17 +5,15 @@ import time
 from math import ceil, floor
 import itertools
 
-class Renderer():
-	def __init__(self, xRes = 512, yRes = 512):
+class FullRenderer():
+	def __init__(self, xRes = 512, yRes = 512, AA = 0):
 		self.xRes = xRes
 		self.yRes = yRes
+		self.AA = min(AA, 7)
 
 		self.cam = Camera(xRes, yRes, xPos = -.5)
 
-		imsave('dynamic.png', self.renderQuadImage(10000, 100))
-		imsave('fullRes.png', self.renderImage(100))
-
-	def renderImage(self, maxIters):
+	def render(self, maxIters):
 		t = time.clock()
 
 		image = [[mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), maxIters) for x in range(self.xRes)] for y in range(self.yRes)]
@@ -23,42 +21,61 @@ class Renderer():
 		print("Render time was " + str(time.clock()-t) + " seconds.")
 		return image
 
-	def renderQuadImage(self, subdivMax, maxIters):
+class QuadRenderer():
+	def __init__(self, res = 512, AA = 0, disableMaxResAA = True):
+		self.res = res
+		self.AA = AA
+		self.disableMaxResAA = disableMaxResAA
+
+		self.cam = Camera(res, res, xPos = -.5)
+
+	def render(self, subdivMax, maxIters):
 		def sparseRender(x, y, size):
-			corn = []
-			for i in [(x, y), (x+size, y), (x, y+size), (x+size, y+size)]:
+			if size == 1 and self.disableMaxResAA:
+				return mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), maxIters)
+			half = size/2
+			pixelList = [(x, y), (x+size, y+size), (x+size, y), (x, y+size), (x+half, y+half), (x+half, y), (x, y+half), (x+half, y+size), (x+size, y+half)]
+			pix = []
+			for i in pixelList:
+				if len(pix) > self.AA+2:
+					break
 				if i in sparseArray:
-					corn.append(sparseArray[i])
+					pix.append(sparseArray[i])
 				else:
-					corn.append(mandelbrot.render(self.cam.convertX(i[0]), self.cam.convertY(i[1]), maxIters))
-					sparseArray[i] = corn[-1]
-			return sum(corn)
+					pix.append(mandelbrot.render(self.cam.convertX(i[0]), self.cam.convertY(i[1]), maxIters))
+					sparseArray[i] = pix[-1]
+			return sum(pix)
 
 		t = time.clock()
-		image = [[0 for x in range(self.xRes)] for y in range(self.yRes)]
+		image = [[0 for x in range(self.res)] for y in range(self.res)]
 		sparseArray = {}
 
-		s = floor(self.xRes/2)
+		s = floor(self.res/2)
 		quadList = [
 		Quad(0, 0, s, sparseRender(0, 0, s)),
 		Quad(0, s, s, sparseRender(0, s, s)),
 		Quad(s, 0, s, sparseRender(s, 0, s)),
 		Quad(s, s, s, sparseRender(s, s, s))]
-		sortLimit = 0
+		sortLimit = 0 # heuristically limit how often we sort to improve performance
 		while subdivMax:
 			subdivMax -= 1
 			sortLimit -= 1
-			if sortLimit <= 0:
+			if sortLimit <= 0 or quadList[0].priority == 0:
 				quadList.sort(key = lambda q: q.priority, reverse = True)
 				sortLimit = floor(len(quadList)/2)
+				if quadList[0].priority == 0:
+					break
 			current = quadList.pop(0)
 			newSize = floor(current.size/2)
 			for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
 				quadList.append(Quad(j[0], j[1], newSize, sparseRender(j[0], j[1], newSize)))
-		for q in quadList:
+		print(len(quadList))
+		for i in range(len(quadList)):
+			q = quadList[i]
 			for y in range(q.y, q.y + q.size):
 				for x in range(q.x, q.x + q.size):
-					image[y][x] = q.color
+					#image[y][x] = q.color
+					image[y][x] = i
 		print("Dynamic render time was " + str(time.clock()-t) + " seconds.")
 		return image
 
@@ -92,5 +109,8 @@ class Quad():
 		else:
 			self.priority = size*color
 
-
-Renderer()
+if __name__ == "__main__":
+	fullR = FullRenderer()
+	quadR = QuadRenderer(AA = 2, disableMaxResAA = True)
+	imsave('dynamic.png', quadR.render(100000, 100))
+	imsave('fullRes.png', fullR.render(100))
