@@ -55,8 +55,8 @@ class QuadRenderer():
 		Quad(0, 0, s, sparseRender(0, 0, s)),
 		Quad(0, s, s, sparseRender(0, s, s)),
 		Quad(s, 0, s, sparseRender(s, 0, s)),
-		Quad(s, s, s, sparseRender(s, s, s))]
-		sortLimit = 0 # heuristically limit how often we sort to improve performance
+		Quad(s, s, s, sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
+		sortLimit = 0 # heuristically limit how often we sort to improve
 		while subdivMax:
 			subdivMax -= 1
 			sortLimit -= 1
@@ -69,8 +69,7 @@ class QuadRenderer():
 			newSize = floor(current.size/2)
 			for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
 				quadList.append(Quad(j[0], j[1], newSize, sparseRender(j[0], j[1], newSize)))
-		print(len(quadList))
-		for i in range(len(quadList)):
+		for i in range(len(quadList)): # iterate over index so that index maps can be rendered
 			q = quadList[i]
 			for y in range(q.y, q.y + q.size):
 				for x in range(q.x, q.x + q.size):
@@ -78,6 +77,62 @@ class QuadRenderer():
 					image[y][x] = i
 		print("Dynamic render time was " + str(time.clock()-t) + " seconds.")
 		return image
+
+
+class RealtimeQuadRenderer():
+	def __init__(self, res = 512, AA = 0, disableMaxResAA = True, subdivMax = 5000, maxIters = 100):
+		self.res = res
+		self.AA = AA
+		self.disableMaxResAA = disableMaxResAA
+		self.subdivMax = subdivMax
+		self.maxIters = maxIters
+
+		self.cam = Camera(res, res, xPos = -.5)
+
+	def sparseRender(self, x, y, size):
+		if size == 1 and self.disableMaxResAA:
+			return mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), maxIters)
+		half = size/2
+		pixelList = [(x, y), (x+size, y+size), (x+size, y), (x, y+size), (x+half, y+half), (x+half, y), (x, y+half), (x+half, y+size), (x+size, y+half)]
+		pix = []
+		for i in pixelList:
+			if len(pix) > self.AA+2:
+				break
+			if i in sparseArray:
+				pix.append(sparseArray[i])
+			else:
+				pix.append(mandelbrot.render(self.cam.convertX(i[0]), self.cam.convertY(i[1]), maxIters))
+				sparseArray[i] = pix[-1]
+		return sum(pix)
+
+	def beginRender(self): # begin or restart the render (e.g. when the position changes)
+		self.image = [[0 for x in range(self.res)] for y in range(self.res)]
+		self.sparseArray = {}
+		s = floor(self.res/2)
+		self.quadList = [
+		Quad(0, 0, s, self.sparseRender(0, 0, s)),
+		Quad(0, s, s, self.sparseRender(0, s, s)),
+		Quad(s, 0, s, self.sparseRender(s, 0, s)),
+		Quad(s, s, s, self.sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
+
+	def tickRenderer(self): # subdivide and update the highest priority quad
+			if self.quadList[0].priority == 0:
+				self.quadList.sort(key = lambda q: q.priority, reverse = True)
+				if quadList[0].priority == 0:
+					break
+			current = self.quadList.pop(0)
+			newSize = floor(current.size/2)
+			for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
+				self.quadList.append(Quad(j[0], j[1], newSize, self.sparseRender(j[0], j[1], newSize)))
+
+	def updateImage(self): # update the image (e.g. to display it while rendering) 
+		for i in range(len(self.quadList)): # iterate over index so that index maps can be rendered
+			q = self.quadList[i]
+			for y in range(q.y, q.y + q.size):
+				for x in range(q.x, q.x + q.size):
+					self.image[y][x] = q.color
+					#self.image[y][x] = i
+					#self.image[y][x] = q.priority
 
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
