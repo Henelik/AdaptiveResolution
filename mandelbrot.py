@@ -1,5 +1,4 @@
 from numba import jit
-from math import sqrt, log
 
 @jit(cache = True)
 def render(zReal, zImag, maxIter = 100):
