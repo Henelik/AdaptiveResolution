@@ -9,7 +9,7 @@ class FullRenderer():
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
 		self.xRes = xRes
 		self.yRes = yRes
-		self.AA = min(max(AA, 0), 8)
+		self.AA = min(max(AA-1, 0), 7)
 		self.maxIters = maxIters
 
 		self.cam = Camera(xRes, yRes, xPos = -.5)
@@ -22,10 +22,10 @@ class FullRenderer():
 		for y in range(self.yRes):
 			for x in range(self.xRes):
 				pix = []
-				AAList = [(x+.5, y+.1), (x+.75, y+.25), (x+.9, y+.)]
+				AAList = [(x+.25, y+.25), (x+.75, y+.75), (x+.25, y+.75), (x+.75, y+.25), (x+.5, y+.1), (x+.5, y+.9), (x+.1, y+.5), (x+.9, y+.5)]
 				for i in range(self.AA+1):
-					pix.append(mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), self.maxIters))
-				image[x][y] = sum(pix)
+					pix.append(mandelbrot.render(self.cam.convertX(AAList[i][0]), self.cam.convertY(AAList[i][1]), self.maxIters))
+				image[y][x] = sum(pix)
 
 		print("Render time was " + str(time.clock()-t) + " seconds.")
 		return image
@@ -185,7 +185,7 @@ class Quad():
 
 if __name__ == "__main__":
 	res = 1024
-	fullR = FullRenderer(xRes = res, yRes = res)
+	fullR = FullRenderer(xRes = res, yRes = res, AA = 0)
 	quadR = QuadRenderer(res = res, AA = 2, disableMaxResAA = False, subdivMax = 15000)
 	imsave('dynamic.png', quadR.render())
 	imsave('fullRes.png', fullR.render())
