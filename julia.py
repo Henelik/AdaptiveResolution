@@ -1,7 +1,7 @@
 from numba import jit
 
 @jit(cache = True)
-def render(zReal, zImag, cReal, cImag, maxIter = 500):
+def render(zReal, zImag, cReal, cImag, maxIter = 100):
     for n in range(maxIter):
         # Square the real and imaginary components BEFORE checking for divergence
         real2 = zReal*zReal

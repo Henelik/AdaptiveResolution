@@ -89,6 +89,12 @@ class QuadRenderer():
 		return image
 
 
+class JuliaQuadRenderer(QuadRenderer):
+	def __init__(self, res = 512, AA = 0, disableMaxResAA = True, subdivMax = 5000, maxIters = 100, cx = 0.1, cy = .25):
+		super.__init__(res, AA, disableMaxResAA, subdivMax, maxIters)
+		self.cx = cx
+		self.cy = cy
+
 class RealtimeQuadRenderer():
 	def __init__(self, res = 512, AA = 0, disableMaxResAA = True, subdivMax = 5000, maxIters = 100):
 		self.res = res
