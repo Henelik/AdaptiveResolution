@@ -67,26 +67,24 @@ class QuadRenderer():
 		Quad(0, s, s, sparseRender(0, s, s)),
 		Quad(s, 0, s, sparseRender(s, 0, s)),
 		Quad(s, s, s, sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
-		sortLimit = 0 # heuristically limit how often we sort to improve
+		sortLimit = 0 # heuristically limit how often we sort to improve performance
 		subdivisions = 0
 		while subdivisions < self.subdivMax:
 			subdivisions += 1
 			sortLimit -= 1
 			if sortLimit <= 0 or quadList[0].priority == 0:
 				quadList.sort(key = lambda q: q.priority, reverse = True)
-				sortLimit = floor(len(quadList)/2)
+				sortLimit = floor(len(quadList)*.5)
 				if quadList[0].priority == 0:
 					break
 			current = quadList.pop(0)
 			newSize = floor(current.size/2)
 			for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
 				quadList.append(Quad(j[0], j[1], newSize, sparseRender(j[0], j[1], newSize)))
-		for i in range(len(quadList)): # iterate over index so that index maps can be rendered
-			q = quadList[i]
+		for q in quadList:
 			for y in range(q.y, q.y + q.size):
 				for x in range(q.x, q.x + q.size):
 					image[y][x] = q.color
-					#image[y][x] = i
 		print("Dynamic render time was " + str(time.clock()-t) + " seconds.")
 		return image
 
@@ -184,8 +182,8 @@ class Quad():
 			self.priority = size*size*color
 
 if __name__ == "__main__":
-	res = 1024
+	res = 512
 	fullR = FullRenderer(xRes = res, yRes = res, AA = 4)
-	quadR = QuadRenderer(res = res, AA = 2, disableMaxResAA = False, subdivMax = 15000)
+	quadR = QuadRenderer(res = res, AA = 2, disableMaxResAA = True, subdivMax = 15000)
 	imsave('dynamic.png', quadR.render())
 	imsave('fullRes.png', fullR.render())
