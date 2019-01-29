@@ -185,7 +185,7 @@ class Quad():
 
 if __name__ == "__main__":
 	res = 1024
-	fullR = FullRenderer(xRes = res, yRes = res, AA = 0)
+	fullR = FullRenderer(xRes = res, yRes = res, AA = 4)
 	quadR = QuadRenderer(res = res, AA = 2, disableMaxResAA = False, subdivMax = 15000)
 	imsave('dynamic.png', quadR.render())
 	imsave('fullRes.png', fullR.render())
