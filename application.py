@@ -23,10 +23,12 @@ class MyWidget(Widget):
 			self.renderer.tick()
 		self.renderer.updateImage()
 		self.canvas.ask_update()
+		#print("tick")
 
 
 class WidgetsApp(App):
 	def build(self):
+		self.title = 'Quadtree Renderer'
 		return MyWidget()
 
 

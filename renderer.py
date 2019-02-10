@@ -139,7 +139,7 @@ class JuliaQuadRenderer(QuadRenderer):
 
 
 class RealtimeQuadRenderer():
-	def __init__(self, res = 512, AA = 0, disableMaxResAA = True, subdivMax = 5000, maxIters = 100):
+	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100):
 		self.res = res
 		self.AA = AA
 		self.disableMaxResAA = disableMaxResAA
@@ -150,6 +150,8 @@ class RealtimeQuadRenderer():
 
 	def sparseRender(self, x, y, size):
 		if size == 1 and self.disableMaxResAA:
+			if (x, y) in self.sparseArray:
+				return self.sparseArray[(x, y)]
 			return mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), self.maxIters)
 		half = size/2
 		pixelList = [(x, y), (x+size, y+size), (x+size, y), (x, y+size), (x+half, y+half), (x+half, y), (x, y+half), (x+half, y+size), (x+size, y+half)]
@@ -178,7 +180,7 @@ class RealtimeQuadRenderer():
 	def tick(self): # subdivide and update the highest priority quad
 		self.sortLimit -= 1
 		if self.sortLimit <= 0 or self.quadList[0].priority == 0:
-			self.quadList.sort(key = lambda q: q.priority, reverse = True)
+			self.quadList.sort(key = lambda q: int(q.priority), reverse = True)
 			self.sortLimit = len(self.quadList)//2
 			print("sorting")
 		if self.quadList[0].priority == 0:
@@ -199,12 +201,14 @@ class RealtimeQuadRenderer():
 
 	def updateImage(self): # update the image (e.g. to display it while rendering) 
 		for i in range(len(self.quadList)):
-			q = self.quadList[i]
-			for y in range(q.y, q.y + q.size):
-				for x in range(q.x, q.x + q.size):
-					self.image[y][x] = (q.color, q.color, q.color)
-					#self.image[y][x] = i
-					#self.image[y][x] = q.priority
+			if not self.quadList[i].updated:
+				q = self.quadList[i]
+				for y in range(q.y, q.y + q.size):
+					for x in range(q.x, q.x + q.size):
+						self.image[y][x] = (q.color, q.color, q.color)
+						#self.image[y][x] = i
+						#self.image[y][x] = q.priority
+				q.updated = True
 
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
@@ -224,9 +228,6 @@ class Camera(): # This class is responsible for handling the conversion from pix
 	def convertY(self, y):
 		return (y-self.yRes/2)*self.zoom/self.yRes-self.yPos
 
-quadSpec = [
-
-]
 
 
 class Quad():
@@ -235,6 +236,7 @@ class Quad():
 		self.y = y
 		self.size = size
 		self.color = color
+		self.updated = False
 		if size <= 1:
 			self.priority = 0
 		else:
