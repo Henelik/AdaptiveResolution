@@ -9,7 +9,7 @@ class RendererWidget(Widget):
 	def __init__(self):
 		super().__init__()
 		self.res = 512
-		self.texture = Texture.create(size=(self.res, self.res), colorfmt='rgb')
+		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte", colorfmt='rgb')
 		with self.canvas:
 			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
 		self.renderer = RealtimeQuadRenderer(res = self.res, AA = 3, maxIters = 100)
@@ -17,10 +17,10 @@ class RendererWidget(Widget):
 		Clock.schedule_interval(self.tick, 1 / 30.)
 
 	def tick(self, dt):
-		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt="rgb")
 		for i in range(10):
 			self.renderer.tick()
 		self.renderer.updateImage()
+		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt="rgb")
 		self.canvas.ask_update()
 
 
