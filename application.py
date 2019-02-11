@@ -5,13 +5,14 @@ from kivy.clock import Clock
 from kivy.graphics import Rectangle
 from renderer import RealtimeQuadRenderer, FullRenderer
 
-class MyWidget(Widget):
+class RendererWidget(Widget):
 	def __init__(self):
 		super().__init__()
-		self.texture = Texture.create(size=(512, 512), colorfmt='rgb')
+		res = 512
+		self.texture = Texture.create(size=(res, res), colorfmt='rgb')
 		with self.canvas:
-			Rectangle(texture=self.texture, pos=(0, 0), size=(512, 512))
-		self.renderer = RealtimeQuadRenderer(AA = 3, maxIters = 10000)
+			Rectangle(texture=self.texture, pos=(0, 0), size=(res, res))
+		self.renderer = RealtimeQuadRenderer(res = res, AA = 3, maxIters = 100)
 		self.renderer.begin()
 		Clock.schedule_interval(self.tick, 1 / 30.)
 
@@ -23,11 +24,11 @@ class MyWidget(Widget):
 		self.canvas.ask_update()
 
 
-class WidgetsApp(App):
+class RendererApp(App):
 	def build(self):
 		self.title = 'Quadtree Renderer'
-		return MyWidget()
+		return RendererWidget()
 
 
 if __name__=="__main__":
-	WidgetsApp().run()
+	RendererApp().run()

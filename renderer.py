@@ -14,16 +14,13 @@ class FullRenderer():
 
 	def render(self):
 		t = time.clock()
-
-		#image = [[mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), maxIters) for x in range(self.xRes)] for y in range(self.yRes)]
-		#image = [[0 for x in range(self.xRes)] for y in range(self.yRes)]
 		image = np.zeros((self.xRes, self.yRes, 3), dtype=np.uint8)
 		for y in range(self.yRes):
 			for x in range(self.xRes):
 				pix = []
 				AAList = [(x+.25, y+.25), (x+.75, y+.75), (x+.25, y+.75), (x+.75, y+.25), (x+.5, y+.1), (x+.5, y+.9), (x+.1, y+.5), (x+.9, y+.5)]
 				for i in range(self.AA+1):
-					pix.append(mandelbrot.render(self.cam.convertX(AAList[i][0]), self.cam.convertY(AAList[i][1]), self.maxIters))
+					pix.append(self.renderPixel(AAList[i]))
 				col = sum(pix)
 				image[y][x][0] = col
 				image[y][x][1] = col
@@ -32,6 +29,9 @@ class FullRenderer():
 		print("Render time was " + str(time.clock()-t) + " seconds.")
 		return image
 
+	def renderPixel(self, coords):
+		return mandelbrot.render(self.cam.convertX(coords[0]), self.cam.convertY(coords[1]), self.maxIters)
+
 
 class JuliaFullRenderer(FullRenderer):
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100, cx = 0.3, cy = .5):
@@ -39,21 +39,17 @@ class JuliaFullRenderer(FullRenderer):
 		self.cx = cx
 		self.cy = cy
 
-	def render(self):
-		t = time.clock()
+	def renderPixel(self, coords):
+		return julia.render(self.cam.convertX(coords[0]), self.cam.convertY(coords[1]), self.cx, self.cy, self.maxIters)
 
-		#image = [[mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), maxIters) for x in range(self.xRes)] for y in range(self.yRes)]
-		image = [[0 for x in range(self.xRes)] for y in range(self.yRes)]
-		for y in range(self.yRes):
-			for x in range(self.xRes):
-				pix = []
-				AAList = [(x+.25, y+.25), (x+.75, y+.75), (x+.25, y+.75), (x+.75, y+.25), (x+.5, y+.1), (x+.5, y+.9), (x+.1, y+.5), (x+.9, y+.5)]
-				for i in range(self.AA+1):
-					pix.append(julia.render(self.cam.convertX(AAList[i][0]), self.cam.convertY(AAList[i][1]), self.cx, self.cy, self.maxIters))
-				image[y][x] = sum(pix)
 
-		print("Render time was " + str(time.clock()-t) + " seconds.")
-		return image
+class CactusFullRenderer(FullRenderer):
+	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 1000):
+		super().__init__(xRes, yRes, AA, maxIters)
+		self.cam.xPos = 0
+
+	def renderPixel(self, coords):
+		return cactus.render(self.cam.convertX(coords[0]), self.cam.convertY(coords[1]), self.maxIters)
 
 
 class QuadRenderer():
@@ -182,7 +178,6 @@ class RealtimeQuadRenderer():
 		if self.sortLimit <= 0 or self.quadList[0].priority == 0:
 			self.quadList.sort(key = lambda q: int(q.priority), reverse = True)
 			self.sortLimit = len(self.quadList)//2
-			print("sorting")
 		if self.quadList[0].priority == 0:
 			print("Can't subdivide further!")
 			return
@@ -243,12 +238,14 @@ class Quad():
 			self.priority = size*size*color
 
 if __name__ == "__main__":
-	res = 512
+	res = 4096
 	quadR = QuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
 	fullR = FullRenderer(xRes = res, yRes = res, AA = 4)
 	juliaR = JuliaQuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
 	fullJuliaR = JuliaFullRenderer(xRes = res, yRes = res, AA = 4)
+	cactR = CactusFullRenderer(xRes = res, yRes = res, AA = 7)
 	#imsave('dynamic.png', quadR.render())
-	imsave('fullRes.png', fullR.render())
+	#imsave('fullRes.png', fullR.render())
 	#imsave('juliaQuad.png', juliaR.render())
 	#imsave('julia.png', fullJuliaR.render())
+	imsave('cactus.png', cactR.render())
