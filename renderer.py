@@ -3,7 +3,7 @@ from scipy.misc import imsave
 import gradient, mandelbrot, cactus, julia, time
 import numpy as np
 
-class FullRenderer():
+class FullRenderer(): # a "traditional" per-pixel Mandelbrot renderer
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
 		self.xRes = xRes
 		self.yRes = yRes
@@ -20,39 +20,37 @@ class FullRenderer():
 				pix = []
 				AAList = [(x+.25, y+.25), (x+.75, y+.75), (x+.25, y+.75), (x+.75, y+.25), (x+.5, y+.1), (x+.5, y+.9), (x+.1, y+.5), (x+.9, y+.5)]
 				for i in range(self.AA+1):
-					pix.append(self.renderPixel(AAList[i]))
+					pix.append(self.renderPixel(self.cam.convertPos(AAList[i][0], AAList[i][1])))
 				col = sum(pix)
-				image[y][x][0] = col
-				image[y][x][1] = col
-				image[y][x][2] = col
+				image[y][x] = (col, col, col)
 
 		print("Render time was " + str(time.clock()-t) + " seconds.")
 		return image
 
 	def renderPixel(self, coords):
-		return mandelbrot.render(self.cam.convertX(coords[0]), self.cam.convertY(coords[1]), self.maxIters)
+		return mandelbrot.render(coords[0], coords[1], self.maxIters)
 
 
-class JuliaFullRenderer(FullRenderer):
+class JuliaFullRenderer(FullRenderer): # a traditional Julia renderer
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100, cx = 0.3, cy = .5):
 		super().__init__(xRes, yRes, AA, maxIters)
 		self.cx = cx
 		self.cy = cy
 
 	def renderPixel(self, coords):
-		return julia.render(self.cam.convertX(coords[0]), self.cam.convertY(coords[1]), self.cx, self.cy, self.maxIters)
+		return julia.render(coords[0], coords[1], self.cx, self.cy, self.maxIters)
 
 
-class CactusFullRenderer(FullRenderer):
+class CactusFullRenderer(FullRenderer): # a traditional Cactus renderer
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 1000):
 		super().__init__(xRes, yRes, AA, maxIters)
 		self.cam.xPos = 0
 
 	def renderPixel(self, coords):
-		return cactus.render(self.cam.convertX(coords[0]), self.cam.convertY(coords[1]), self.maxIters)
+		return cactus.render(coords[0], coords[1], self.maxIters)
 
 
-class QuadRenderer():
+class QuadRenderer(): # a non-interactive (not ticked) version of the quadtree renderer
 	def __init__(self, res = 512, AA = 0, disableMaxResAA = True, subdivMax = 5000, maxIters = 100):
 		self.res = res
 		self.AA = min(max(AA, 0), 7)
@@ -134,7 +132,7 @@ class JuliaQuadRenderer(QuadRenderer):
 		return sum(pix)
 
 
-class RealtimeQuadRenderer():
+class RealtimeQuadRenderer(): # the realtime quadtree renderer
 	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100):
 		self.res = res
 		self.AA = AA
@@ -201,8 +199,6 @@ class RealtimeQuadRenderer():
 				for y in range(q.y, q.y + q.size):
 					for x in range(q.x, q.x + q.size):
 						self.image[y][x] = (q.color, q.color, q.color)
-						#self.image[y][x] = i
-						#self.image[y][x] = q.priority
 				q.updated = True
 
 
@@ -215,7 +211,7 @@ class Camera(): # This class is responsible for handling the conversion from pix
 		self.zoom = zoom
 
 	def convertPos(self, x, y):
-		return((convertX(x), convertY(y)))
+		return((self.convertX(x), self.convertY(y)))
 
 	def convertX(self, x):
 		return (x-self.xRes/2)*self.zoom/self.xRes+self.xPos
@@ -229,8 +225,8 @@ class Quad():
 		self.x = x
 		self.y = y
 		self.size = size
-		self.color = color
-		self.updated = False
+		self.color = color # the scalar color of the quad (based on iterations till convergence)
+		self.updated = False # each quad keeps track of whether it has been added to the image or not
 		if size <= 1:
 			self.priority = 0
 		else:
@@ -238,14 +234,14 @@ class Quad():
 
 
 if __name__ == "__main__":
-	res = 4096
-	quadR = QuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
+	res = 1024
 	fullR = FullRenderer(xRes = res, yRes = res, AA = 4)
-	juliaR = JuliaQuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
 	fullJuliaR = JuliaFullRenderer(xRes = res, yRes = res, AA = 4)
 	cactR = CactusFullRenderer(xRes = res, yRes = res, AA = 7)
-	#imsave('dynamic.png', quadR.render())
-	#imsave('fullRes.png', fullR.render())
-	#imsave('juliaQuad.png', juliaR.render())
+	quadR = QuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
+	juliaR = JuliaQuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
+	imsave('fullRes.png', fullR.render())
+	#imsave('cactus.png', cactR.render())
 	#imsave('julia.png', fullJuliaR.render())
-	imsave('cactus.png', cactR.render())
+	#imsave('dynamic.png', quadR.render())
+	#imsave('juliaQuad.png', juliaR.render())
