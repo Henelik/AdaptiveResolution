@@ -2,6 +2,7 @@ from numba import jit
 from scipy.misc import imsave
 import gradient, mandelbrot, cactus, julia, time
 import numpy as np
+import os
 
 class FullRenderer(): # a "traditional" per-pixel Mandelbrot renderer
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
@@ -235,13 +236,17 @@ class Quad():
 
 if __name__ == "__main__":
 	res = 1024
-	fullR = FullRenderer(xRes = res, yRes = res, AA = 4)
-	fullJuliaR = JuliaFullRenderer(xRes = res, yRes = res, AA = 4)
-	cactR = CactusFullRenderer(xRes = res, yRes = res, AA = 7)
-	quadR = QuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
-	juliaR = JuliaQuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
-	imsave('fullRes.png', fullR.render())
-	#imsave('cactus.png', cactR.render())
-	#imsave('julia.png', fullJuliaR.render())
-	#imsave('dynamic.png', quadR.render())
-	#imsave('juliaQuad.png', juliaR.render())
+	mandelR = FullRenderer(xRes = res, yRes = res, AA = 4)
+	juliaR = JuliaFullRenderer(xRes = res, yRes = res, AA = 4)
+	cactR = CactusFullRenderer(xRes = res, yRes = res, AA = 4)
+	mandelQuadR = QuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
+	juliaQuadR = JuliaQuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
+
+	if not os.path.exists('renders'):
+		os.makedirs('renders')
+
+	imsave('renders/mandel.png', mandelR.render())
+	imsave('renders/julia.png', juliaR.render())
+	imsave('renders/cactus.png', cactR.render())
+	imsave('renders/mandelQuad.png', mandelQuadR.render())
+	imsave('renders/juliaQuad.png', juliaQuadR.render())
