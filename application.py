@@ -8,11 +8,11 @@ from renderer import RealtimeQuadRenderer, FullRenderer
 class RendererWidget(Widget):
 	def __init__(self):
 		super().__init__()
-		res = 512
-		self.texture = Texture.create(size=(res, res), colorfmt='rgb')
+		self.res = 512
+		self.texture = Texture.create(size=(self.res, self.res), colorfmt='rgb')
 		with self.canvas:
-			Rectangle(texture=self.texture, pos=(0, 0), size=(res, res))
-		self.renderer = RealtimeQuadRenderer(res = res, AA = 3, maxIters = 100)
+			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
+		self.renderer = RealtimeQuadRenderer(res = self.res, AA = 3, maxIters = 100)
 		self.renderer.begin()
 		Clock.schedule_interval(self.tick, 1 / 30.)
 
