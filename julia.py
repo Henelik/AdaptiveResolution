@@ -13,4 +13,4 @@ def render(zReal, zImag, cReal, cImag, maxIter = 100):
 		zImag = 2 * zImag * zReal + cImag # Finish the required math for this iteration if the pixel has not diverged yet
 		zReal = real2 - imag2 + cReal
 		if iters >= maxIter:
-			return 0
+			return 0 # return 0 if the pixel does not diverge

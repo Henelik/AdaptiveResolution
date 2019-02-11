@@ -224,7 +224,6 @@ class Camera(): # This class is responsible for handling the conversion from pix
 		return (y-self.yRes/2)*self.zoom/self.yRes-self.yPos
 
 
-
 class Quad():
 	def __init__(self, x, y, size, color):
 		self.x = x
@@ -236,6 +235,7 @@ class Quad():
 			self.priority = 0
 		else:
 			self.priority = size*size*color
+
 
 if __name__ == "__main__":
 	res = 4096

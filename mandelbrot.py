@@ -15,4 +15,4 @@ def render(zx, zy, maxIter = 100):
 		y = 2 * x * y + zy # Finish the required math for this iteration if the pixel has not diverged yet
 		x = x2 - y2 + zx
 		if iters >= maxIter:
-			return 0
+			return 0 # return 0 if the pixel does not diverge

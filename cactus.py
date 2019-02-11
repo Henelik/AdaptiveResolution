@@ -12,6 +12,7 @@ def render(zx, zy, maxIter = 100):
 		y2 = y*y
 		if x2 + y2 > 4.0: # Check for divergence against 4 instead of 2 because of squared coordinates
 			return iters # Return the number of iterations if this pixel diverges
-		x, y = (x2 - 3*y2 + zx - 1)*x - y*zy - zx, (3*x2 - y2 + zx - 1)*y + x*zy - zy # Finish the required math for this iteration if the pixel has not diverged yet
+		# Finish the required math for this iteration if the pixel has not diverged yet
+		x, y = (x2 - 3*y2 + zx - 1)*x - y*zy - zx, (3*x2 - y2 + zx - 1)*y + x*zy - zy
 		if iters >= maxIter:
-			return 0
+			return 0 # return 0 if the pixel does not diverge
