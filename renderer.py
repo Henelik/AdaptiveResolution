@@ -217,6 +217,15 @@ class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
 		return julia.render(coords[0], coords[1], self.cx, self.cy, self.maxIters)
 
 
+class RealtimeCactusQuadRenderer(RealtimeQuadRenderer):
+	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100):
+		super().__init__(res, AA, disableMaxResAA, subdivMax, maxIters)
+		self.cam.xPos = 0
+
+	def renderPixel(self, coords):
+		return cactus.render(coords[0], coords[1], self.maxIters)
+
+
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
 	def __init__(self, xRes, yRes, xPos = 0, yPos = 0, zoom = 2):
 		self.xRes = xRes
@@ -245,7 +254,7 @@ class Quad():
 		if size <= 1:
 			self.priority = 0
 		else:
-			self.priority = size*size*color
+			self.priority = color*size*size
 
 
 if __name__ == "__main__":

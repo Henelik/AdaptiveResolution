@@ -3,7 +3,7 @@ from kivy.uix.widget import Widget
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 from kivy.graphics import Rectangle
-from renderer import RealtimeQuadRenderer, RealtimeJuliaQuadRenderer
+from renderer import RealtimeQuadRenderer, RealtimeJuliaQuadRenderer, RealtimeCactusQuadRenderer
 
 class RendererWidget(Widget):
 	def __init__(self):
@@ -12,7 +12,7 @@ class RendererWidget(Widget):
 		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte", colorfmt='rgb')
 		with self.canvas:
 			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
-		self.renderer = RealtimeJuliaQuadRenderer(res = self.res, AA = 8, maxIters = 100)
+		self.renderer = RealtimeCactusQuadRenderer(res = self.res, AA = 8, maxIters = 100)
 		self.renderer.begin()
 		Clock.schedule_interval(self.tick, 1 / 30.)
 
