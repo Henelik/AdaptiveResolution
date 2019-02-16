@@ -147,7 +147,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		if size == 1 and self.disableMaxResAA:
 			if (x, y) in self.sparseArray:
 				return self.sparseArray[(x, y)]
-			return mandelbrot.render(self.cam.convertX(x), self.cam.convertY(y), self.maxIters)
+			return self.renderPixel(self.cam.convertPos(x, y))
 		half = size/2
 		pixelList = [(x, y), (x+size, y+size), (x+size, y), (x, y+size), (x+half, y+half), (x+half, y), (x, y+half), (x+half, y+size), (x+size, y+half)]
 		pix = []
@@ -157,12 +157,15 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 			if i in self.sparseArray:
 				pix.append(self.sparseArray[i])
 			else:
-				pix.append(mandelbrot.render(self.cam.convertX(i[0]), self.cam.convertY(i[1]), self.maxIters))
+				pix.append(self.renderPixel(self.cam.convertPos(i[0], i[1])))
 				self.sparseArray[i] = pix[-1]
 		return sum(pix)
 
+	def renderPixel(self, coords):
+		return mandelbrot.render(coords[0], coords[1], self.maxIters)
+
 	def begin(self): # begin or restart the render (e.g. when the position changes)
-		self.image = np.zeros(shape=(self.res, self.res, 3), dtype=np.uint8)
+		self.image = np.zeros(shape=(self.res, self.res, 3), dtype=np.int8)
 		self.sparseArray = {}
 		s = self.res//2
 		self.sortLimit = 10
@@ -201,6 +204,17 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 					for x in range(q.x, q.x + q.size):
 						self.image[y][x] = (q.color, q.color, q.color)
 				q.updated = True
+
+
+class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
+	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100, cx = .3, cy = .5):
+		super().__init__(res, AA, disableMaxResAA, subdivMax, maxIters)
+		self.cx = cx
+		self.cy = cy
+		self.cam.xPos = 0
+
+	def renderPixel(self, coords):
+		return julia.render(coords[0], coords[1], self.cx, self.cy, self.maxIters)
 
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
