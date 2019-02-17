@@ -43,7 +43,7 @@ class JuliaFullRenderer(FullRenderer): # a traditional Julia renderer
 
 
 class CactusFullRenderer(FullRenderer): # a traditional Cactus renderer
-	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 1000):
+	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
 		super().__init__(xRes, yRes, AA, maxIters)
 		self.cam.xPos = 0
 
