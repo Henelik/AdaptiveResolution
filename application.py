@@ -24,10 +24,14 @@ class RendererWidget(Widget):
 		self.canvas.ask_update()
 
 
+class RootWidget(Widget):
+	pass
+
+
 class RendererApp(App):
 	def build(self):
 		self.title = 'Quadtree Renderer'
-		return RendererWidget()
+		return RootWidget()
 
 
 if __name__=="__main__":
