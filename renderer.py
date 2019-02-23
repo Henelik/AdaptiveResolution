@@ -32,6 +32,16 @@ class FullRenderer(): # a "traditional" per-pixel Mandelbrot renderer
 		return mandelbrot.render(coords[0], coords[1], self.maxIters)
 
 
+class GradientRenderer(FullRenderer):
+	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
+		super().__init__(xRes, yRes, AA, maxIters)
+		self.cam.xPos = .5
+		self.cam.zoom = 1
+
+	def renderPixel(self, coords):
+		return gradient.render(coords[0], coords[1])
+
+
 class JuliaFullRenderer(FullRenderer): # a traditional Julia renderer
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100, cx = 0.3, cy = .5):
 		super().__init__(xRes, yRes, AA, maxIters)
@@ -267,9 +277,10 @@ if __name__ == "__main__":
 
 	if not os.path.exists('renders'):
 		os.makedirs('renders')
-
+	"""
 	imsave('renders/mandel.png', mandelR.render())
 	imsave('renders/julia.png', juliaR.render())
 	imsave('renders/cactus.png', cactR.render())
 	imsave('renders/mandelQuad.png', mandelQuadR.render())
-	imsave('renders/juliaQuad.png', juliaQuadR.render())
+	imsave('renders/juliaQuad.png', juliaQuadR.render())"""
+	imsave('renders/gradient.png', GradientRenderer(xRes = res, yRes = res).render())
