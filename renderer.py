@@ -269,18 +269,18 @@ class Quad():
 
 if __name__ == "__main__":
 	res = 1024
-	mandelR = FullRenderer(xRes = res, yRes = res, AA = 4)
-	juliaR = JuliaFullRenderer(xRes = res, yRes = res, AA = 4)
-	cactR = CactusFullRenderer(xRes = res, yRes = res, AA = 4)
+	mandelR = FullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 1000)
+	juliaR = JuliaFullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 1000)
+	cactR = CactusFullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 1000)
 	mandelQuadR = QuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
 	juliaQuadR = JuliaQuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
 
 	if not os.path.exists('renders'):
 		os.makedirs('renders')
-	"""
+	
 	imsave('renders/mandel.png', mandelR.render())
 	imsave('renders/julia.png', juliaR.render())
 	imsave('renders/cactus.png', cactR.render())
 	imsave('renders/mandelQuad.png', mandelQuadR.render())
-	imsave('renders/juliaQuad.png', juliaQuadR.render())"""
+	imsave('renders/juliaQuad.png', juliaQuadR.render())
 	imsave('renders/gradient.png', GradientRenderer(xRes = res, yRes = res).render())
