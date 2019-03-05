@@ -15,7 +15,7 @@ class FullRenderer(): # a "traditional" per-pixel Mandelbrot renderer
 
 	def render(self):
 		t = time.clock()
-		image = np.zeros((self.xRes, self.yRes, 3), dtype=np.uint8)
+		image = np.zeros((self.xRes, self.yRes, 3), dtype=np.uint32)
 		for y in range(self.yRes):
 			for x in range(self.xRes):
 				pix = []
@@ -40,6 +40,16 @@ class GradientRenderer(FullRenderer):
 
 	def renderPixel(self, coords):
 		return gradient.render(coords[0], coords[1])
+
+
+class SquareMandelRenderer(FullRenderer):
+	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
+		super().__init__(xRes, yRes, AA, maxIters)
+		#self.cam.xPos = .5
+		#self.cam.zoom = 1
+
+	def renderPixel(self, coords):
+		return mandelbrot.renderSquare(coords[0], coords[1], self.maxIters)
 
 
 class JuliaFullRenderer(FullRenderer): # a traditional Julia renderer
@@ -269,9 +279,10 @@ class Quad():
 
 if __name__ == "__main__":
 	res = 1024
-	mandelR = FullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 1000)
-	juliaR = JuliaFullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 1000)
-	cactR = CactusFullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 1000)
+	mandelR = FullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100)
+	squareR = SquareMandelRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100)
+	juliaR = JuliaFullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100)
+	cactR = CactusFullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100)
 	mandelQuadR = QuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
 	juliaQuadR = JuliaQuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
 
@@ -279,6 +290,7 @@ if __name__ == "__main__":
 		os.makedirs('renders')
 	
 	imsave('renders/mandel.png', mandelR.render())
+	imsave('renders/squareMandel.png', squareR.render())
 	imsave('renders/julia.png', juliaR.render())
 	imsave('renders/cactus.png', cactR.render())
 	imsave('renders/mandelQuad.png', mandelQuadR.render())
