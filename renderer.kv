@@ -1,3 +1,38 @@
-RootWidget:
-
-<RenderWidget>:
+<RootWidget>:
+	ActionBar:
+		pos_hint: {'top':1}
+        ActionView:
+            use_separator: True
+            ActionPrevious:
+                title: 'QuadRenderer'
+                with_previous: False
+            ActionGroup:
+                text: 'File'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                ActionButton:
+                    text: 'New'
+                ActionButton:
+                    text: 'Open'
+                ActionButton:
+                    text: 'Save'
+                ActionButton:
+                    text: 'Save As'
+                ActionButton:
+                    text: 'Quit'
+                    on_press: app.Quit()
+            ActionGroup:
+                text: 'Fractal'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                ActionButton:
+                    text: 'Mandelbrot'
+                ActionButton:
+                    text: 'Julia'
+                ActionButton:
+                    text: 'Cactus'
+                ActionButton:
+                    text: 'Gradient'
+    #RendererWidget

@@ -1,5 +1,6 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
+from kivy.uix.floatlayout import FloatLayout
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 from kivy.graphics import Rectangle
@@ -24,14 +25,18 @@ class RendererWidget(Widget):
 		self.canvas.ask_update()
 
 
-class RootWidget(Widget):
-	pass
+class RootWidget(FloatLayout):
+	def __init__(self, **kwargs):
+		super().__init__(**kwargs)
 
 
 class RendererApp(App):
 	def build(self):
 		self.title = 'Quadtree Renderer'
 		return RootWidget()
+
+	def Quit(self):
+		self.stop()
 
 
 if __name__=="__main__":
