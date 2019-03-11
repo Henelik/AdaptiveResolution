@@ -246,6 +246,16 @@ class RealtimeCactusQuadRenderer(RealtimeQuadRenderer):
 		return cactus.render(coords[0], coords[1], self.maxIters)
 
 
+class RealtimeGradientQuadRenderer(RealtimeQuadRenderer):
+	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100):
+		super().__init__(res, AA, disableMaxResAA, subdivMax, maxIters)
+		self.cam.xPos = .5
+		self.cam.zoom = 1
+
+	def renderPixel(self, coords):
+		return gradient.render(coords[0], coords[1])
+
+
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
 	def __init__(self, xRes, yRes, xPos = 0, yPos = 0, zoom = 2):
 		self.xRes = xRes
@@ -289,10 +299,10 @@ if __name__ == "__main__":
 	if not os.path.exists('renders'):
 		os.makedirs('renders')
 	
-	imsave('renders/mandel.png', mandelR.render())
-	imsave('renders/squareMandel.png', squareR.render())
-	imsave('renders/julia.png', juliaR.render())
-	imsave('renders/cactus.png', cactR.render())
-	imsave('renders/mandelQuad.png', mandelQuadR.render())
-	imsave('renders/juliaQuad.png', juliaQuadR.render())
+	#imsave('renders/mandel.png', mandelR.render())
+	#imsave('renders/squareMandel.png', squareR.render())
+	#imsave('renders/julia.png', juliaR.render())
+	#imsave('renders/cactus.png', cactR.render())
+	#imsave('renders/mandelQuad.png', mandelQuadR.render())
+	#imsave('renders/juliaQuad.png', juliaQuadR.render())
 	imsave('renders/gradient.png', GradientRenderer(xRes = res, yRes = res).render())
