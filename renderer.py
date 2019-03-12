@@ -45,8 +45,6 @@ class GradientRenderer(FullRenderer):
 class SquareMandelRenderer(FullRenderer):
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
 		super().__init__(xRes, yRes, AA, maxIters)
-		#self.cam.xPos = .5
-		#self.cam.zoom = 1
 
 	def renderPixel(self, coords):
 		return mandelbrot.renderSquare(coords[0], coords[1], self.maxIters)
@@ -263,10 +261,15 @@ class Quad():
 
 
 class ColorConverter():
-	def __init__(self, profile = None):
-		self.profile = profile
+	def __init__(self, profileName = "golden"):
+		self.loadProfile(profileName)
+
+	def loadProfile(self):
+		self.profileName = profileName
+		
 
 	def convert(self, scalar): # take a ratio and convert it to an RGB int ala Blender's Color Ramp node
+		
 		return (scalar, scalar, scalar)
 
 

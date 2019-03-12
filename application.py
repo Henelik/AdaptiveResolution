@@ -11,7 +11,7 @@ class RendererWidget(Widget):
 		super().__init__(*args)
 		self.res = 512
 		self.AA = 8
-		self.maxIters = 100
+		self.maxIters = 1000
 		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte")#, colorfmt="rgb")
 		with self.canvas:
 			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
@@ -38,8 +38,13 @@ class RendererWidget(Widget):
 			self.renderer = RealtimeGradientQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		else:
 			raise(TypeError)
-			return
 		self.renderer.begin()
+
+	def changeColor(self, color):
+		if color == "greyscale":
+			pass
+		else:
+			raise(TypeError)
 
 
 class RootWidget(FloatLayout):
