@@ -185,7 +185,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		return mandelbrot.render(coords[0], coords[1], self.maxIters)
 
 	def begin(self): # begin or restart the render (e.g. when the position changes)
-		self.image = np.zeros(shape=(self.res, self.res, 3), dtype=np.int8)
+		self.image = np.zeros(shape=(self.res, self.res, 3), dtype=np.uint8)
 		self.sparseArray = {}
 		s = self.res//2
 		self.sortLimit = 10
@@ -202,19 +202,12 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 			self.sortLimit = len(self.quadList)//2
 		if self.quadList[0].priority == 0:
 			print("Can't subdivide further!")
-			return
+			return False
 		current = self.quadList.pop(0)
 		newSize = current.size//2
 		for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
-			q = Quad(j[0], j[1], newSize, self.sparseRender(j[0], j[1], newSize))
-			inserted = False
-			for k in range(len(self.quadList)):
-				if self.quadList[k].priority <= q.priority:
-					self.quadList.insert(k, q)
-					inserted = True
-					break
-			if not inserted:
-				self.quadList.append(q)
+			self.quadList.append(Quad(j[0], j[1], newSize, self.sparseRender(j[0], j[1], newSize)))
+		return True
 
 	def updateImage(self): # update the image (e.g. to display it while rendering) 
 		for i in range(len(self.quadList)):
@@ -256,6 +249,27 @@ class RealtimeGradientQuadRenderer(RealtimeQuadRenderer):
 		return gradient.render(coords[0], coords[1])
 
 
+class Quad():
+	def __init__(self, x, y, size, color):
+		self.x = x
+		self.y = y
+		self.size = size
+		self.color = color # the scalar color of the quad (based on iterations till convergence)
+		self.updated = False # each quad keeps track of whether it has been added to the image or not
+		if size <= 1:
+			self.priority = 0
+		else:
+			self.priority = color*size*size
+
+
+class ColorConverter():
+	def __init__(self, profile = None):
+		self.profile = profile
+
+	def convert(self, scalar): # take a ratio and convert it to an RGB int ala Blender's Color Ramp node
+		return (scalar, scalar, scalar)
+
+
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
 	def __init__(self, xRes, yRes, xPos = 0, yPos = 0, zoom = 2):
 		self.xRes = xRes
@@ -272,19 +286,6 @@ class Camera(): # This class is responsible for handling the conversion from pix
 
 	def convertY(self, y):
 		return (y-self.yRes/2)*self.zoom/self.yRes-self.yPos
-
-
-class Quad():
-	def __init__(self, x, y, size, color):
-		self.x = x
-		self.y = y
-		self.size = size
-		self.color = color # the scalar color of the quad (based on iterations till convergence)
-		self.updated = False # each quad keeps track of whether it has been added to the image or not
-		if size <= 1:
-			self.priority = 0
-		else:
-			self.priority = color*size*size
 
 
 if __name__ == "__main__":
