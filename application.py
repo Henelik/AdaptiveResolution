@@ -12,7 +12,7 @@ class RendererWidget(Widget):
 		self.res = 512
 		self.AA = 8
 		self.maxIters = 100
-		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte", colorfmt="rgb")
+		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte")#, colorfmt="rgb")
 		with self.canvas:
 			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
 		self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
@@ -21,9 +21,10 @@ class RendererWidget(Widget):
 
 	def tick(self, dt):
 		for i in range(10):
-			self.renderer.tick()
+			if not self.renderer.tick():
+				break
 		self.renderer.updateImage()
-		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt="rgb")
+		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte")#, colorfmt="rgb")
 		self.canvas.ask_update()
 
 	def changeFractal(self, fractal):
