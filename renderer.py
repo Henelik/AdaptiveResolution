@@ -3,6 +3,7 @@ from scipy.misc import imsave
 import gradient, mandelbrot, cactus, julia, time
 import numpy as np
 import os
+import cv2
 
 class FullRenderer(): # a "traditional" per-pixel Mandelbrot renderer
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
@@ -158,6 +159,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		self.disableMaxResAA = disableMaxResAA
 		self.subdivMax = subdivMax
 		self.maxIters = maxIters
+		self.colorProfile = ColorConverter()
 
 		self.cam = Camera(res, res, xPos = -.5)
 
@@ -177,7 +179,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 			else:
 				pix.append(self.renderPixel(self.cam.convertPos(i[0], i[1])))
 				self.sparseArray[i] = pix[-1]
-		return sum(pix)
+		return sum(pix)/len(pix)
 
 	def renderPixel(self, coords):
 		return mandelbrot.render(coords[0], coords[1], self.maxIters)
@@ -211,9 +213,13 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		for i in range(len(self.quadList)):
 			if not self.quadList[i].updated:
 				q = self.quadList[i]
+				if self.colorProfile.profileName != "greyscale":
+					c = self.colorProfile.convert(q.color/self.maxIters)
+				else:
+					c = (q.color, q.color, q.color)
 				for y in range(q.y, q.y + q.size):
 					for x in range(q.x, q.x + q.size):
-						self.image[y][x] = (q.color, q.color, q.color)
+						self.image[y][x] = c
 				q.updated = True
 
 
@@ -261,16 +267,20 @@ class Quad():
 
 
 class ColorConverter():
-	def __init__(self, profileName = "golden"):
+	def __init__(self, profileName = "greyscale"):
 		self.loadProfile(profileName)
 
-	def loadProfile(self):
+	def loadProfile(self, profileName):
 		self.profileName = profileName
-		
+		if profileName != "greyscale":
+			self.ramp = cv2.imread("color_profiles/" + profileName + ".bmp")#,mode='RGB')
+			#print("Ramp is " + str(self.ramp))
 
 	def convert(self, scalar): # take a ratio and convert it to an RGB int ala Blender's Color Ramp node
-		
-		return (scalar, scalar, scalar)
+		if scalar == 0:
+			return(0, 0, 0)
+		i = int(scalar*len(self.ramp[0]))
+		return(self.ramp[0][i][2], self.ramp[0][i][1], self.ramp[0][i][0])
 
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space

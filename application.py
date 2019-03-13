@@ -41,10 +41,14 @@ class RendererWidget(Widget):
 		self.renderer.begin()
 
 	def changeColor(self, color):
-		if color == "greyscale":
-			pass
-		else:
-			raise(TypeError)
+		#if color == "greyscale":
+		#	self.renderer.colorProfile.loadProfile(color)
+		#elif color == "golden":
+		#	self.renderer.colorProfile.loadProfile(color)
+		#else:
+		#	raise(TypeError)
+		self.renderer.colorProfile.loadProfile(color)
+		self.renderer.begin()
 
 
 class RootWidget(FloatLayout):
