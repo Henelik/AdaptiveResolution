@@ -160,6 +160,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		self.subdivMax = subdivMax
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
+		self.colorDivisor = maxIters/3
 
 		self.cam = Camera(res, res, xPos = -.5)
 
@@ -196,6 +197,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		Quad(s, s, s, self.sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
 
 	def tick(self): # subdivide and update the highest priority quad
+		t = time.clock()
 		self.sortLimit -= 1
 		if self.sortLimit <= 0 or self.quadList[0].priority == 0:
 			self.quadList.sort(key = lambda q: int(q.priority), reverse = True)
@@ -207,20 +209,23 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		newSize = current.size//2
 		for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
 			self.quadList.append(Quad(j[0], j[1], newSize, self.sparseRender(j[0], j[1], newSize)))
+		print("Tick time was " + str(time.clock() - t))
 		return True
 
-	def updateImage(self): # update the image (e.g. to display it while rendering) 
+	def updateImage(self): # update the image (e.g. to display it while rendering)
+		t = time.clock()
 		for i in range(len(self.quadList)):
 			if not self.quadList[i].updated:
 				q = self.quadList[i]
 				if self.colorProfile.profileName != "greyscale":
-					c = self.colorProfile.convert(q.color/self.maxIters)
+					c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
 				else:
-					c = (q.color, q.color, q.color)
+					c = (q.color/self.maxIters)*16384
 				for y in range(q.y, q.y + q.size):
 					for x in range(q.x, q.x + q.size):
 						self.image[y][x] = c
 				q.updated = True
+		print("Image update time was " + str(time.clock() - t))
 
 
 class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
