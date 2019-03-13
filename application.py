@@ -20,7 +20,7 @@ class RendererWidget(Widget):
 		Clock.schedule_interval(self.tick, 1 / 30.)
 
 	def tick(self, dt):
-		for i in range(10):
+		for i in range(100):
 			if not self.renderer.tick():
 				break
 		self.renderer.updateImage()
@@ -28,6 +28,7 @@ class RendererWidget(Widget):
 		self.canvas.ask_update()
 
 	def changeFractal(self, fractal):
+		color = self.renderer.colorProfile.profileName
 		if fractal == 'mandelbrot':
 			self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		elif fractal == 'julia':
@@ -38,6 +39,7 @@ class RendererWidget(Widget):
 			self.renderer = RealtimeGradientQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		else:
 			raise(TypeError)
+		self.renderer.colorProfile.loadProfile(color)
 		self.renderer.begin()
 
 	def changeColor(self, color):
