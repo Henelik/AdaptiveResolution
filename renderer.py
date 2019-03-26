@@ -152,10 +152,9 @@ class JuliaQuadRenderer(QuadRenderer):
 
 
 class RealtimeQuadRenderer(): # the realtime quadtree renderer
-	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100):
+	def __init__(self, res = 512, AA = 0, subdivMax = 5000, maxIters = 100):
 		self.res = res
 		self.AA = AA
-		self.disableMaxResAA = disableMaxResAA
 		self.subdivMax = subdivMax
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
@@ -164,10 +163,6 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		self.cam = Camera(res, res, xPos = -.5)
 
 	def sparseRender(self, x, y, size):
-		if size == 1 and self.disableMaxResAA:
-			if (x, y) in self.sparseArray:
-				return self.sparseArray[(x, y)]
-			return self.renderPixel(self.cam.convertPos(x, y))
 		half = size/2
 		pixelList = [(x, y), (x+size, y+size), (x+size, y), (x, y+size), (x+half, y+half), (x+half, y), (x, y+half), (x+half, y+size), (x+size, y+half)]
 		pix = []
