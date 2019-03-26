@@ -1,4 +1,3 @@
-from numba import jit
 from scipy.misc import imsave
 import gradient, mandelbrot, cactus, julia, time
 import numpy as np
@@ -284,7 +283,7 @@ class ColorConverter():
 	def convert(self, scalar): # take a ratio and convert it to an RGB int ala Blender's Color Ramp node
 		if scalar == 0:
 			return(0, 0, 0)
-		i = int(scalar*len(self.ramp[0]))
+		i = int(scalar**(.25)*len(self.ramp[0])*3%len(self.ramp[0]))
 		return(self.ramp[0][i][2], self.ramp[0][i][1], self.ramp[0][i][0])
 
 
@@ -296,16 +295,20 @@ class Camera(): # This class is responsible for handling the conversion from pix
 		self.yPos = yPos
 		self.zoom = zoom
 
+		# convert the center coordinates to lower left coordinates (this is a workaround for now)
+		self.xPos = xPos-zoom/2
+		self.yPos = yPos+zoom/2
+
 	def convertPos(self, x, y):
 		return((self.convertX(x), self.convertY(y)))
 
 	def convertX(self, x): # convert a x coordinate from math to pixel space
-		#return x*self.zoom/self.xRes+self.xPos
-		return ((x-self.xRes/2)*self.zoom/self.xRes)+self.xPos
+		return x*self.zoom/self.xRes+self.xPos
+		#return ((x-self.xRes/2)*self.zoom/self.xRes)+self.xPos
 
 	def convertY(self, y): # convert a y coordinate from math to pixel space
-		#return y*self.zoom/self.yRes-self.yPos
-		return ((y-self.yRes/2)*self.zoom/self.yRes)-self.yPos
+		return y*self.zoom/self.yRes-self.yPos
+		#return ((y-self.yRes/2)*self.zoom/self.yRes)-self.yPos
 
 
 if __name__ == "__main__":
