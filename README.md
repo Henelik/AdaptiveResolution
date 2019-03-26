@@ -10,6 +10,7 @@ A more traditional per-pixel fractal renderer is included for testing purposes, 
  - Numba
  - Kivy
  - Numpy
+ - OpenCV (cv2)
 
 # To Do:
  - make both renderers faster by making better use of the fast functions in numpy and scipy
