@@ -8,26 +8,32 @@ from kivy.clock import Clock
 from kivy.graphics import Rectangle
 from renderer import RealtimeQuadRenderer, RealtimeJuliaQuadRenderer, RealtimeCactusQuadRenderer, RealtimeGradientQuadRenderer
 
+import time
+
 class RendererWidget(Widget):
-	def __init__(self, *args):
-		super().__init__(*args)
-		self.res = 512
-		self.AA = 4
-		self.maxIters = 1000
-		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte")#, colorfmt="rgb")
+	def __init__(self, res = 512, AA = 4, maxIters = 1000, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.res = res
+		self.AA = AA
+		self.maxIters = maxIters
+		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte")
 		with self.canvas:
 			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
 		self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		self.renderer.begin()
-		Clock.schedule_interval(self.tick, 1 / 30.)
+		Clock.schedule_interval(self.tick, 1 / 20.)
 
 	def tick(self, dt):
-		for i in range(100):
+		#t = time.time()
+		for i in range(200):
 			if not self.renderer.tick():
 				break
+		#print("Total iteration time was " + str(time.time()-t))
+		#t = time.time()
 		self.renderer.updateImage()
-		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte")#, colorfmt="rgb")
+		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte")
 		self.canvas.ask_update()
+		#print("Total update time was " + str(time.time()-t))
 
 	def changeFractal(self, fractal):
 		color = self.renderer.colorProfile.profileName
@@ -49,23 +55,21 @@ class RendererWidget(Widget):
 		self.renderer.begin()
 
 	def setZoom(self, x, y, zoom):
+		self.renderer.cam.xPos -= x/self.renderer.cam.xRes*self.renderer.cam.zoom/zoom
+		self.renderer.cam.yPos += y/self.renderer.cam.yRes*self.renderer.cam.zoom/zoom
 		self.renderer.cam.zoom /= zoom
-		self.renderer.cam.xPos -= x/self.renderer.cam.xRes*2
-		self.renderer.cam.yPos += y/self.renderer.cam.yRes*2
 		self.renderer.begin()
 
 
 class RenderScatter(Scatter):
 	def __init__(self, **kwargs):
-		#self.default_bbox = self.bbox
+		self.default_bbox = ()
 		super().__init__(**kwargs)
 
 	def on_touch_up(self, touch):
-		print("Touch up")
 		self.renderer.setZoom(self.transform[12], self.transform[13], self.scale)
 		self.transform.identity()
 		super().on_touch_up(touch)
-		#self.bbox.set(self.default_bbox)
 
 	def set_renderer(self, renderer):
 		self.renderer = renderer
@@ -76,10 +80,9 @@ class RootWidget(FloatLayout):
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 		self.scatter = RenderScatter(auto_bring_to_front = False, do_rotation = False)
-		self.renderer = RendererWidget()
+		self.renderer = RendererWidget(res = 1024, AA = 8)
 		self.scatter.set_renderer(self.renderer)
-		self.add_widget(self.scatter)
-		#self.add_widget(self.renderer)
+		self.add_widget(self.scatter, index = 1)
 
 
 class RendererApp(App):
