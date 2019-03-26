@@ -277,14 +277,14 @@ class ColorConverter():
 	def loadProfile(self, profileName):
 		self.profileName = profileName
 		if profileName != "greyscale":
-			self.ramp = cv2.imread("color_profiles/" + profileName + ".bmp")#,mode='RGB')
-			#print("Ramp is " + str(self.ramp))
+			self.ramp = cv2.imread("color_profiles/" + profileName + ".bmp")[0]
 
 	def convert(self, scalar): # take a ratio and convert it to an RGB int ala Blender's Color Ramp node
 		if scalar == 0:
 			return(0, 0, 0)
-		i = int(scalar**(.25)*len(self.ramp[0])*3%len(self.ramp[0]))
-		return(self.ramp[0][i][2], self.ramp[0][i][1], self.ramp[0][i][0])
+		l = len(self.ramp)
+		i = int(scalar**(.25)*l*3%l)
+		return(self.ramp[i][2], self.ramp[i][1], self.ramp[i][0])
 
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
