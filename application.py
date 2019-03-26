@@ -67,8 +67,9 @@ class RenderScatter(Scatter):
 		super().__init__(**kwargs)
 
 	def on_touch_up(self, touch):
-		self.renderer.setZoom(self.transform[12], self.transform[13], self.scale)
-		self.transform.identity()
+		if self.scale != 1 or self.transform[12] != 0 or self.transform[13] != 0:
+			self.renderer.setZoom(self.transform[12], self.transform[13], self.scale)
+			self.transform.identity()
 		super().on_touch_up(touch)
 
 	def set_renderer(self, renderer):
