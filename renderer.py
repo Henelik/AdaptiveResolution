@@ -209,7 +209,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		newSize = current.size//2
 		for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
 			self.quadList.append(Quad(j[0], j[1], newSize, self.sparseRender(j[0], j[1], newSize)))
-		print("Tick time was " + str(time.clock() - t))
+		#print("Tick time was " + str(time.clock() - t))
 		return True
 
 	def updateImage(self): # update the image (e.g. to display it while rendering)
@@ -225,7 +225,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 					for x in range(q.x, q.x + q.size):
 						self.image[y][x] = c
 				q.updated = True
-		print("Image update time was " + str(time.clock() - t))
+		#print("Image update time was " + str(time.clock() - t))
 
 
 class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
@@ -299,11 +299,13 @@ class Camera(): # This class is responsible for handling the conversion from pix
 	def convertPos(self, x, y):
 		return((self.convertX(x), self.convertY(y)))
 
-	def convertX(self, x):
-		return (x-self.xRes/2)*self.zoom/self.xRes+self.xPos
+	def convertX(self, x): # convert a x coordinate from math to pixel space
+		#return x*self.zoom/self.xRes+self.xPos
+		return ((x-self.xRes/2)*self.zoom/self.xRes)+self.xPos
 
-	def convertY(self, y):
-		return (y-self.yRes/2)*self.zoom/self.yRes-self.yPos
+	def convertY(self, y): # convert a y coordinate from math to pixel space
+		#return y*self.zoom/self.yRes-self.yPos
+		return ((y-self.yRes/2)*self.zoom/self.yRes)-self.yPos
 
 
 if __name__ == "__main__":
