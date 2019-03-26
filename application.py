@@ -16,7 +16,7 @@ class RendererWidget(Widget):
 		self.res = res
 		self.AA = AA
 		self.maxIters = maxIters
-		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte")
+		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte", colorfmt = "bgr")
 		with self.canvas:
 			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
 		self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
@@ -31,7 +31,7 @@ class RendererWidget(Widget):
 		#print("Total iteration time was " + str(time.time()-t))
 		#t = time.time()
 		self.renderer.updateImage()
-		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte")
+		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt = "bgr")
 		self.canvas.ask_update()
 		#print("Total update time was " + str(time.time()-t))
 

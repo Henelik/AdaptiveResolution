@@ -284,7 +284,7 @@ class ColorConverter():
 			return(0, 0, 0)
 		l = len(self.ramp)
 		i = int(scalar**(.25)*l*3%l)
-		return(self.ramp[i][2], self.ramp[i][1], self.ramp[i][0])
+		return self.ramp[i]
 
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
