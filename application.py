@@ -25,7 +25,7 @@ class RendererWidget(Widget):
 
 	def tick(self, dt):
 		#t = time.time()
-		for i in range(200):
+		for i in range(150):
 			if not self.renderer.tick():
 				break
 		#print("Total iteration time was " + str(time.time()-t))

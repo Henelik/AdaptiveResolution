@@ -195,7 +195,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		Quad(s, s, s, self.sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
 
 	def tick(self): # subdivide and update the highest priority quad
-		t = time.clock()
+		#t = time.clock()
 		self.sortLimit -= 1
 		if self.sortLimit <= 0 or self.quadList[0].priority == 0:
 			self.quadList.sort(key = lambda q: int(q.priority), reverse = True)
@@ -211,7 +211,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		return True
 
 	def updateImage(self): # update the image (e.g. to display it while rendering)
-		t = time.clock()
+		#t = time.clock()
 		for i in range(len(self.quadList)):
 			if not self.quadList[i].updated:
 				q = self.quadList[i]
@@ -219,9 +219,6 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 					c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
 				else:
 					c = (q.color/self.maxIters)*16384
-				#for y in range(q.y, q.y + q.size):
-				#	for x in range(q.x, q.x + q.size):
-				#		self.image[y][x] = c
 				self.image[q.y:q.y+q.size, q.x:q.x+q.size] = c
 				q.updated = True
 		#print("Image update time was " + str(time.clock() - t))
@@ -294,20 +291,18 @@ class Camera(): # This class is responsible for handling the conversion from pix
 		self.yPos = yPos
 		self.zoom = zoom
 
-		# convert the center coordinates to lower left coordinates (this is a workaround for now)
+		# convert the center coordinates to lower left coordinates for Kivy compatibility
 		self.xPos = xPos-zoom/2
 		self.yPos = yPos+zoom/2
 
 	def convertPos(self, x, y):
 		return((self.convertX(x), self.convertY(y)))
 
-	def convertX(self, x): # convert a x coordinate from math to pixel space
+	def convertX(self, x): # convert an x coordinate from math to pixel space
 		return x*self.zoom/self.xRes+self.xPos
-		#return ((x-self.xRes/2)*self.zoom/self.xRes)+self.xPos
 
 	def convertY(self, y): # convert a y coordinate from math to pixel space
 		return y*self.zoom/self.yRes-self.yPos
-		#return ((y-self.yRes/2)*self.zoom/self.yRes)-self.yPos
 
 
 if __name__ == "__main__":
