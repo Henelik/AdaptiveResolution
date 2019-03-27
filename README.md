@@ -1,5 +1,5 @@
-# Adaptive Resolution
-An adaptive resolution fractal renderer in Python 3.6.
+# Quadtree Renderer
+A quadtree based IFF renderer in Python 3.6.
 
 The program iteratively renders a fractal by starting with a low-resolution quadtree, rendering the corners of each quad, and subdividing quads which have the highest brightness multiplied by size.
 
