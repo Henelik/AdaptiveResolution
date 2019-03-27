@@ -6,7 +6,7 @@ The program iteratively renders a fractal by starting with a low-resolution quad
 A more traditional per-pixel fractal renderer is included for testing purposes, and will probably be used to render the high-resolution animations in the final application.
 
 # Package Dependencies:
- - Scipy (planning to remove)
+ - Scipy
  - Numba
  - Kivy
  - Numpy

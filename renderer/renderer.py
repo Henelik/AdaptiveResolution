@@ -1,8 +1,12 @@
 from scipy.misc import imsave
-import gradient, mandelbrot, cactus, julia, time
 import numpy as np
 import os
 import cv2
+import time
+try:
+	from renderer import gradient, mandelbrot, cactus, julia
+except(ImportError):
+	import gradient, mandelbrot, cactus, julia
 
 class FullRenderer(): # a "traditional" per-pixel Mandelbrot renderer
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
