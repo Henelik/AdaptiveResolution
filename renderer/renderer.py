@@ -167,6 +167,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		self.cam = Camera(res, res, xPos = -.5)
 
 	def sparseRender(self, x, y, size):
+		# render a quad, referencing the sparse array if applicable
 		half = size/2
 		pixelList = [(x, y), (x+size, y+size), (x+size, y), (x, y+size), (x+half, y+half), (x+half, y), (x, y+half), (x+half, y+size), (x+size, y+half)]
 		pix = []
@@ -222,13 +223,24 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 				q.updated = True
 		#print("Image update time was " + str(time.clock() - t))
 
+	def fullUpdateImage(self): # update the entire image (e.g. when the color changes)
+		# This is a VERY expensive operation, and can take upwards of a second
+		#t = time.clock()
+		for q in self.quadList:
+			if self.colorProfile.profileName != "greyscale":
+				c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
+			else:
+				c = (q.color/self.maxIters)*16384
+			self.image[q.y:q.y+q.size, q.x:q.x+q.size] = c
+			q.updated = True
+		#print("Full update time was " + str(time.clock() - t))
+
 
 class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
 	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100, cx = .3, cy = .5):
 		super().__init__(res, AA, disableMaxResAA, maxIters)
 		self.cx = cx
 		self.cy = cy
-		self.cam.xPos = 0
 
 	def renderPixel(self, coords):
 		return julia.render(coords[0], coords[1], self.cx, self.cy, self.maxIters)

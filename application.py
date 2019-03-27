@@ -52,7 +52,7 @@ class RendererWidget(Widget):
 
 	def changeColor(self, color):
 		self.renderer.colorProfile.loadProfile(color)
-		self.renderer.begin()
+		self.renderer.fullUpdateImage()
 
 	def setZoom(self, x, y, zoom):
 		self.renderer.cam.xPos -= x/self.renderer.cam.xRes*self.renderer.cam.zoom/zoom
