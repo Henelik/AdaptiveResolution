@@ -1,7 +1,9 @@
 # Adaptive Resolution
 An adaptive resolution fractal renderer in Python 3.6.
 
-The program iteratively renders a fractal by starting with a low-resolution quadtree, rendering the corners of each quad, and subdividing quads which have the highest brightness multiplied by size.  The goal is to make this quadtree-based renderer run in a realtime application explicitly for exploring fractals and setting animation paths to be rendered later by a higher quality renderer.  This will probably be done in pygame.
+The program iteratively renders a fractal by starting with a low-resolution quadtree, rendering the corners of each quad, and subdividing quads which have the highest brightness multiplied by size.
+
+Kivy allows this application to run interactively in realtime.
 
 A more traditional per-pixel fractal renderer is included for testing purposes, and will probably be used to render the high-resolution animations in the final application.
 
@@ -13,5 +15,7 @@ A more traditional per-pixel fractal renderer is included for testing purposes, 
  - OpenCV (cv2)
 
 # To Do:
- - make both renderers faster by making better use of the fast functions in numpy and scipy
- - find a good formula to calculate an efficient subdivision limit based on image size to render decent quality images in the least amount of time
+ - Create a formula to control the iteration count and degree multiplier based on zoom
+ - Add generalized iteration algorithm so users can input iterative functions without modifying code
+ - Add full rendering within application (save image button)
+ - Add code in the Kivy application to adaptively change the number of ticks based on the time it takes to tick and update
