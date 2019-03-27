@@ -212,9 +212,8 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 
 	def updateImage(self): # update the image (e.g. to display it while rendering)
 		#t = time.clock()
-		for i in range(len(self.quadList)):
-			if not self.quadList[i].updated:
-				q = self.quadList[i]
+		for q in self.quadList:
+			if not q.updated:
 				if self.colorProfile.profileName != "greyscale":
 					c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
 				else:
@@ -226,7 +225,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 
 class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
 	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100, cx = .3, cy = .5):
-		super().__init__(res, AA, disableMaxResAA, subdivMax, maxIters)
+		super().__init__(res, AA, disableMaxResAA, maxIters)
 		self.cx = cx
 		self.cy = cy
 		self.cam.xPos = 0
@@ -237,7 +236,7 @@ class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
 
 class RealtimeCactusQuadRenderer(RealtimeQuadRenderer):
 	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100):
-		super().__init__(res, AA, disableMaxResAA, subdivMax, maxIters)
+		super().__init__(res, AA, disableMaxResAA, maxIters)
 		self.cam.xPos = 0
 
 	def renderPixel(self, coords):
@@ -246,7 +245,7 @@ class RealtimeCactusQuadRenderer(RealtimeQuadRenderer):
 
 class RealtimeGradientQuadRenderer(RealtimeQuadRenderer):
 	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100):
-		super().__init__(res, AA, disableMaxResAA, subdivMax, maxIters)
+		super().__init__(res, AA, disableMaxResAA, maxIters)
 		self.cam.xPos = .5
 		self.cam.zoom = 1
 
