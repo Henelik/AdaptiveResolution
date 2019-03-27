@@ -219,9 +219,10 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 					c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
 				else:
 					c = (q.color/self.maxIters)*16384
-				for y in range(q.y, q.y + q.size):
-					for x in range(q.x, q.x + q.size):
-						self.image[y][x] = c
+				#for y in range(q.y, q.y + q.size):
+				#	for x in range(q.x, q.x + q.size):
+				#		self.image[y][x] = c
+				self.image[q.y:q.y+q.size, q.x:q.x+q.size] = c
 				q.updated = True
 		#print("Image update time was " + str(time.clock() - t))
 
@@ -279,11 +280,10 @@ class ColorConverter():
 			self.ramp = cv2.imread("color_profiles/" + profileName + ".bmp")[0]
 
 	def convert(self, scalar): # take a ratio and convert it to an RGB int ala Blender's Color Ramp node
-		if scalar == 0:
+		if scalar == 0: # exception for converging quads
 			return(0, 0, 0)
 		l = len(self.ramp)
-		i = int(scalar**(.25)*l*3%l)
-		return self.ramp[i]
+		return self.ramp[int(scalar**(.25)*l*3%l)]
 
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space

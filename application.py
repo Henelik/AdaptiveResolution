@@ -21,7 +21,7 @@ class RendererWidget(Widget):
 			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
 		self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		self.renderer.begin()
-		Clock.schedule_interval(self.tick, 1 / 20.)
+		Clock.schedule_interval(self.tick, 1 / 30.)
 
 	def tick(self, dt):
 		#t = time.time()
