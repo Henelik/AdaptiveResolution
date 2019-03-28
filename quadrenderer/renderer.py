@@ -3,10 +3,9 @@ import numpy as np
 import os
 import cv2
 import time
-try:
-	from renderer import gradient, mandelbrot, cactus, julia
-except(ImportError):
-	import gradient, mandelbrot, cactus, julia
+import sys
+sys.path.append("..")
+from quadrenderer import gradient, mandelbrot, cactus, julia
 
 class FullRenderer(): # a "traditional" per-pixel Mandelbrot renderer
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
@@ -317,21 +316,21 @@ class Camera(): # This class is responsible for handling the conversion from pix
 
 
 if __name__ == "__main__":
-	res = 1024
-	mandelR = FullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100)
-	squareR = SquareMandelRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100)
-	juliaR = JuliaFullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100)
-	cactR = CactusFullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100)
-	mandelQuadR = QuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
-	juliaQuadR = JuliaQuadRenderer(res = res, AA = 4, disableMaxResAA = False, subdivMax = 15000)
+	res = 256
+	mandelR = FullRenderer(xRes = res, yRes = res, AA = 8, maxIters = 1000)
 
 	if not os.path.exists('renders'):
 		os.makedirs('renders')
 	
-	#imsave('renders/mandel.png', mandelR.render())
-	#imsave('renders/squareMandel.png', squareR.render())
-	#imsave('renders/julia.png', juliaR.render())
-	#imsave('renders/cactus.png', cactR.render())
-	#imsave('renders/mandelQuad.png', mandelQuadR.render())
-	#imsave('renders/juliaQuad.png', juliaQuadR.render())
-	imsave('renders/gradient.png', GradientRenderer(xRes = res, yRes = res).render())
+	imsave('renders/mandel.png', FullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100).render())
+
+	quadRenderer = RealtimeQuadRenderer(res = res, AA = 8, maxIters = 1000)
+	quadRenderer.begin()
+	t = time.time()
+
+	while quadRenderer.tick():
+		pass
+
+	quadRenderer.updateImage()
+	print("Quad render time was " + str(time.time() - t))
+	imsave('renders/quadMandel.png', quadRenderer.image)
