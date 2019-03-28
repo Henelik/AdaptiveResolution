@@ -103,12 +103,34 @@ class QuadRenderer(): # a non-interactive (not ticked) version of the quadtree r
 		image = [[0 for x in range(self.res)] for y in range(self.res)]
 		self.sparseArray = {}
 
-		s = self.res//2
+		s1 = self.res//2
+		s2 = self.res//4
+		#quadList = [
+		#Quad(0, 0, s, self.sparseRender(0, 0, s)),
+		#Quad(0, s, s, self.sparseRender(0, s, s)),
+		#Quad(s, 0, s, self.sparseRender(s, 0, s)),
+		#Quad(s, s, s, self.sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
+		# new initial quadlist starts with a 4x4 grid instead of 2x2
 		quadList = [
-		Quad(0, 0, s, self.sparseRender(0, 0, s)),
-		Quad(0, s, s, self.sparseRender(0, s, s)),
-		Quad(s, 0, s, self.sparseRender(s, 0, s)),
-		Quad(s, s, s, self.sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
+		Quad(0, 0, s2, self.sparseRender(0, 0, s2)),
+		Quad(0, s1, s2, self.sparseRender(0, s1, s2)),
+		Quad(s1, 0, s2, self.sparseRender(s1, 0, s2)),
+		Quad(s1, s1, s2, self.sparseRender(s1, s1, s2)), # the 4 top left subdivisions
+
+		Quad(s2, 0, s2, self.sparseRender(s2, 0, s2)),
+		Quad(s2, s1, s2, self.sparseRender(s2, s1, s2)),
+		Quad(s1+s2, 0, s2, self.sparseRender(s1+s2, 0, s2)),
+		Quad(s1+s2, s1, s2, self.sparseRender(s1+s2, s1, s2)), # the 4 top right subdivisions
+
+		Quad(0, s2, s2, self.sparseRender(0, s2, s2)),
+		Quad(0, s1+s2, s2, self.sparseRender(0, s1+s2, s2)),
+		Quad(s1, s2, s2, self.sparseRender(s1, s2, s2)),
+		Quad(s1, s1+s2, s2, self.sparseRender(s1, s1+s2, s2)), # the 4 bottom left subdivisions
+
+		Quad(s2, s2, s2, self.sparseRender(s2, s2, s2)),
+		Quad(s2, s1+s2, s2, self.sparseRender(s2, s1+s2, s2)),
+		Quad(s1+s2, s2, s2, self.sparseRender(s1+s2, s2, s2)),
+		Quad(s1+s2, s1+s2, s2, self.sparseRender(s1+s2, s1+s2, s2))] # the 4 bottom right subdivisions
 		sortLimit = 0 # heuristically limit how often we sort to improve performance
 		subdivisions = 0
 		while subdivisions < self.subdivMax:
