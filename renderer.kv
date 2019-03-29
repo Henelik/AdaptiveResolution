@@ -1,4 +1,21 @@
 <RootWidget>:
+    StackLayout:
+        pos_hint: {'right':1, 'top':.9}
+        important: True
+        orientation: 'lr-tb'
+        size_hint: (.3, 1)
+        Button:
+            text: 'Test'
+            on_press: root.renderer.changeColor("golden")
+            width: 80
+            pos_hint: {'right':0}
+            size_hint: (None, 0.05)
+        Button:
+            text: 'Test2'
+            on_press: root.renderer.changeColor("golden")
+            width: 80
+            pos_hint: {'right':0}
+            size_hint: (None, 0.05)
 	ActionBar:
 		pos_hint: {'top':1}
         important: True
@@ -28,32 +45,42 @@
                 mode: 'spinner'
                 size_hint_x: None
                 width: 90
-                ActionButton:
+                ActionToggleButton:
                     text: 'Mandelbrot'
                     on_press: root.renderer.changeFractal('mandelbrot')
-                ActionButton:
+                    group: 'fractal'
+                    state: 'down'
+                ActionToggleButton:
                     text: 'Julia'
                     on_press: root.renderer.changeFractal('julia')
-                ActionButton:
+                    group: 'fractal'
+                ActionToggleButton:
                     text: 'Cactus'
                     on_press: root.renderer.changeFractal('cactus')
-                ActionButton:
+                    group: 'fractal'
+                ActionToggleButton:
                     text: 'Gradient'
                     on_press: root.renderer.changeFractal('gradient')
+                    group: 'fractal'
             ActionGroup:
                 text: 'Color'
                 mode: 'spinner'
                 size_hint_x: None
                 width: 90
-                ActionButton:
+                ActionToggleButton:
                     text: 'Greyscale'
                     on_press: root.renderer.changeColor("greyscale")
-                ActionButton:
+                    group: 'color'
+                    state: 'down'
+                ActionToggleButton:
                     text: 'Golden'
                     on_press: root.renderer.changeColor("golden")
-                ActionButton:
+                    group: 'color'
+                ActionToggleButton:
                     text: 'Horizon'
                     on_press: root.renderer.changeColor("horizon")
-                ActionButton:
+                    group: 'color'
+                ActionToggleButton:
                     text: 'Incandescent'
                     on_press: root.renderer.changeColor("incandescent")
+                    group: 'color'
