@@ -2,6 +2,7 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.scatter import Scatter
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.stacklayout import StackLayout
 from kivy.graphics.transformation import Matrix
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
@@ -54,7 +55,7 @@ class RendererWidget(Widget):
 		self.renderer.colorProfile.loadProfile(color)
 		self.renderer.fullUpdateImage()
 
-	def setZoom(self, x, y, zoom):
+	def changeView(self, x, y, zoom):
 		self.renderer.cam.xPos -= x/self.renderer.cam.xRes*self.renderer.cam.zoom/zoom
 		self.renderer.cam.yPos += y/self.renderer.cam.yRes*self.renderer.cam.zoom/zoom
 		self.renderer.cam.zoom /= zoom
@@ -66,9 +67,18 @@ class RenderScatter(Scatter):
 		self.default_bbox = ()
 		super().__init__(**kwargs)
 
+	def on_touch_down(self, touch):
+		if touch.is_mouse_scrolling:
+			p = self.renderer.res*.05
+			if touch.button == 'scrolldown':
+				self.renderer.changeView(-p, -p, 1.1)
+			elif touch.button == 'scrollup':
+				self.renderer.changeView(p, p, .9)
+		super().on_touch_down(touch)
+
 	def on_touch_up(self, touch):
 		if self.scale != 1 or self.transform[12] != 0 or self.transform[13] != 0:
-			self.renderer.setZoom(self.transform[12], self.transform[13], self.scale)
+			self.renderer.changeView(self.transform[12], self.transform[13], self.scale)
 			self.transform.identity()
 		super().on_touch_up(touch)
 
@@ -83,7 +93,7 @@ class RootWidget(FloatLayout):
 		self.scatter = RenderScatter(auto_bring_to_front = False, do_rotation = False)
 		self.renderer = RendererWidget(res = 1024, AA = 8)
 		self.scatter.set_renderer(self.renderer)
-		self.add_widget(self.scatter, index = 1)
+		self.add_widget(self.scatter, index = 2)
 
 
 class RendererApp(App):
