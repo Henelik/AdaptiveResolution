@@ -226,7 +226,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		self.AA = AA
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
-		self.colorDivisor = maxIters/2
+		self.colorDivisor = maxIters/3
 
 		self.cam = Camera(res, res, xPos = -.5)
 

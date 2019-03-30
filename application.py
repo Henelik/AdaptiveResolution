@@ -20,6 +20,8 @@ class RendererWidget(Widget):
 		self.res = res
 		self.AA = AA
 		self.maxIters = maxIters
+		self.rampValue = 3
+		self.fractal = 'mandelbrot'
 		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte", colorfmt = "bgr")
 		with self.canvas:
 			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
@@ -57,6 +59,7 @@ class RendererWidget(Widget):
 			raise(TypeError)
 		self.renderer.colorProfile.loadProfile(color)
 		self.renderer.begin()
+		self.fractal = fractal
 
 	def changeColor(self, color):
 		self.renderer.colorProfile.loadProfile(color)
@@ -68,13 +71,19 @@ class RendererWidget(Widget):
 		self.renderer.cam.zoom /= zoom
 		self.renderer.begin()
 
+	def changeRamp(self, value):
+		if value != self.rampValue:
+			self.rampValue = value
+			self.renderer.colorDivisor = self.maxIters/value/value
+			self.renderer.fullUpdateImage()
+
 	def saveImage(self):
 		if not os.path.exists('screenshots'):
 			os.makedirs('screenshots')
 		i = 0
-		while os.path.exists('screenshots/screen' + str(i) + '.png'):
+		while os.path.exists('screenshots/' + self.fractal + str(i) + '.png'):
 			i += 1
-		imageio.imwrite('screenshots/screen' + str(i) + '.png', self.renderer.image[:, :, ::-1])
+		imageio.imwrite('screenshots/' + self.fractal + str(i) + '.png', self.renderer.image[:, :, ::-1])
 
 
 class RenderScatter(Scatter):
@@ -106,9 +115,9 @@ class RootWidget(FloatLayout):
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 		self.scatter = RenderScatter(auto_bring_to_front = False, do_rotation = False)
-		self.renderer = RendererWidget(res = 1024, AA = 8)
+		self.renderer = RendererWidget(res = 1024, AA = 8, maxIters = 2000)
 		self.scatter.set_renderer(self.renderer)
-		self.add_widget(self.scatter, index = 2)
+		self.add_widget(self.scatter, index = 3)
 
 
 class RendererApp(App):
