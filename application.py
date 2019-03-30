@@ -25,13 +25,12 @@ class RendererWidget(Widget):
 		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte", colorfmt = "bgr")
 		with self.canvas:
 			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
-		#self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		self.renderer.begin()
 		Clock.schedule_once(self.tick, 0)
 
 	def tick(self, dt):
-		t = time.time()
+		#t = time.time()
 		for i in range(150):
 			if not self.renderer.tick():
 				break
@@ -40,7 +39,7 @@ class RendererWidget(Widget):
 		self.renderer.updateImage()
 		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt = "bgr")
 		self.canvas.ask_update()
-		Clock.schedule_once(self.tick, 0)#(time.time()-t)*.1)
+		Clock.schedule_once(self.tick, 0)
 		#print("Total update time was " + str(time.time()-t))
 
 	def changeFractal(self, fractal):
@@ -65,9 +64,14 @@ class RendererWidget(Widget):
 		self.renderer.colorProfile.loadProfile(color)
 		self.renderer.fullUpdateImage()
 
+	def changeColorMode(self, mode):
+		self.renderer.colorSlice = mode
+		self.renderer.fullUpdateImage()
+
 	def changeView(self, x, y, zoom):
-		self.renderer.cam.xPos -= x/self.renderer.cam.xRes*self.renderer.cam.zoom/zoom
-		self.renderer.cam.yPos += y/self.renderer.cam.yRes*self.renderer.cam.zoom/zoom
+		zr = self.renderer.cam.zoom/zoom
+		self.renderer.cam.xPos -= x/self.renderer.cam.xRes*zr
+		self.renderer.cam.yPos += y/self.renderer.cam.yRes*zr
 		self.renderer.cam.zoom /= zoom
 		self.renderer.begin()
 
@@ -83,7 +87,7 @@ class RendererWidget(Widget):
 		i = 0
 		while os.path.exists('screenshots/' + self.fractal + str(i) + '.png'):
 			i += 1
-		imageio.imwrite('screenshots/' + self.fractal + str(i) + '.png', self.renderer.image[:, :, ::-1])
+		imageio.imwrite('screenshots/' + self.fractal + str(i) + '.png', self.renderer.image[:, ::-1, ::-1])
 
 
 class RenderScatter(Scatter):

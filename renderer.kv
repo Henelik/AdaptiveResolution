@@ -8,21 +8,21 @@
             text: 'Test'
             on_press: root.renderer.changeColor("golden")
             width: 80
-            size_hint: (1, 0.004)
+            size_hint: (1, 1)
         Button:
             text: 'Test2'
             on_press: root.renderer.changeColor("golden")
             width: 80
-            size_hint: (1, 0.004)
+            size_hint: (1, 1)
         Button:
             text: 'Test3'
             on_press: root.renderer.changeColor("golden")
             width: 80
-            size_hint: (1, 0.004)
+            size_hint: (1, 1)
         BoxLayout:
             important: True
             width: 80
-            size_hint: (1, 0.004)
+            size_hint: (1, 1)
             Label:
                 text: 'Color Ramp Strength'
                 width: 80
@@ -103,4 +103,22 @@
                 ActionToggleButton:
                     text: 'Incandescent'
                     on_press: root.renderer.changeColor("incandescent")
+                    group: 'color'
+            ActionGroup:
+                text: 'Color Mode'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                ActionToggleButton:
+                    text: 'RGB'
+                    on_press: root.renderer.changeColorMode(0)
+                    group: 'color'
+                    state: 'down'
+                ActionToggleButton:
+                    text: 'GBR'
+                    on_press: root.renderer.changeColorMode(1)
+                    group: 'color'
+                ActionToggleButton:
+                    text: 'BRG'
+                    on_press: root.renderer.changeColorMode(2)
                     group: 'color'

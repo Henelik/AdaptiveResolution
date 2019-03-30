@@ -227,6 +227,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
 		self.colorDivisor = maxIters/3
+		self.colorSlice = 0
 
 		self.cam = Camera(res, res, xPos = -.5)
 
@@ -301,7 +302,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		for q in self.quadList:
 			if not q.updated:
 				c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
-				self.image[q.y:q.y+q.size, q.x:q.x+q.size] = c
+				self.image[q.y:q.y+q.size, q.x:q.x+q.size] = np.append(c[self.colorSlice:], c[:self.colorSlice])
 				q.updated = True
 		#print("Image update time was " + str(time.clock() - t))
 
@@ -310,7 +311,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		#t = time.clock()
 		for q in self.quadList:
 			c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
-			self.image[q.y:q.y+q.size, q.x:q.x+q.size] = c
+			self.image[q.y:q.y+q.size, q.x:q.x+q.size] = np.append(c[self.colorSlice:], c[:self.colorSlice])
 			q.updated = True
 		#print("Full update time was " + str(time.clock() - t))
 
