@@ -8,13 +8,21 @@
             text: 'Test'
             on_press: root.renderer.changeColor("golden")
             width: 80
-            pos_hint: {'right':0}
             size_hint: (None, 0.05)
         Button:
             text: 'Test2'
             on_press: root.renderer.changeColor("golden")
             width: 80
-            pos_hint: {'right':0}
+            size_hint: (None, 0.05)
+        Label:
+            text: 'Ramp Strength'
+            width: 80
+            size_hint: (None, 0.05)
+        Slider:
+            min: .4
+            max: 3
+            value: 1.5
+            width: 80
             size_hint: (None, 0.05)
 	ActionBar:
 		pos_hint: {'top':1}
@@ -27,16 +35,14 @@
             ActionGroup:
                 text: 'File'
                 mode: 'spinner'
-                size_hint_x: None
                 width: 90
-                ActionButton:
-                    text: 'New'
                 ActionButton:
                     text: 'Open'
                 ActionButton:
-                    text: 'Save'
+                    text: 'Save Image'
+                    on_press: root.renderer.saveImage()
                 ActionButton:
-                    text: 'Save As'
+                    text: 'Save Coordinate'
                 ActionButton:
                     text: 'Quit'
                     on_press: app.Quit()
@@ -64,7 +70,7 @@
                     group: 'fractal'
                 ActionToggleButton:
                     text: 'Scanline'
-                    on_press: root.renderer.changeFractal('fullmandel')
+                    on_press: root.renderer.changeFractal('scanline')
                     group: 'fractal'
             ActionGroup:
                 text: 'Color'

@@ -7,9 +7,12 @@ from kivy.graphics.transformation import Matrix
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 from kivy.graphics import Rectangle
+
 from quadrenderer.renderer import RealtimeQuadRenderer, RealtimeJuliaQuadRenderer, RealtimeCactusQuadRenderer, RealtimeGradientQuadRenderer, RealtimeFullRenderer
 
+import imageio
 import time
+import os
 
 class RendererWidget(Widget):
 	def __init__(self, res = 512, AA = 4, maxIters = 1000, *args, **kwargs):
@@ -23,7 +26,7 @@ class RendererWidget(Widget):
 		#self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		self.renderer.begin()
-		Clock.schedule_once(self.tick, 1 / 30.)
+		Clock.schedule_once(self.tick, 0)
 
 	def tick(self, dt):
 		t = time.time()
@@ -48,7 +51,7 @@ class RendererWidget(Widget):
 			self.renderer = RealtimeCactusQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		elif fractal == 'gradient':
 			self.renderer = RealtimeGradientQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
-		elif fractal == 'fullmandel':
+		elif fractal == 'scanline':
 			self.renderer = RealtimeFullRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		else:
 			raise(TypeError)
@@ -64,6 +67,14 @@ class RendererWidget(Widget):
 		self.renderer.cam.yPos += y/self.renderer.cam.yRes*self.renderer.cam.zoom/zoom
 		self.renderer.cam.zoom /= zoom
 		self.renderer.begin()
+
+	def saveImage(self):
+		if not os.path.exists('screenshots'):
+			os.makedirs('screenshots')
+		i = 0
+		while os.path.exists('screenshots/screen' + str(i) + '.png'):
+			i += 1
+		imageio.imwrite('screenshots/screen' + str(i) + '.png', self.renderer.image[:, :, ::-1])
 
 
 class RenderScatter(Scatter):
