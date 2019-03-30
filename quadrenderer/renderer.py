@@ -322,8 +322,8 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 
 
 class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
-	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100, cx = .3, cy = .5):
-		super().__init__(res, AA, disableMaxResAA, maxIters)
+	def __init__(self, res = 512, AA = 0, maxIters = 100, cx = .3, cy = .5):
+		super().__init__(res, AA, maxIters)
 		self.cx = cx
 		self.cy = cy
 
@@ -332,8 +332,8 @@ class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
 
 
 class RealtimeCactusQuadRenderer(RealtimeQuadRenderer):
-	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100):
-		super().__init__(res, AA, disableMaxResAA, maxIters)
+	def __init__(self, res = 512, AA = 0, maxIters = 100):
+		super().__init__(res, AA, maxIters)
 		self.cam.xPos = 0
 
 	def renderPixel(self, coords):
@@ -341,8 +341,8 @@ class RealtimeCactusQuadRenderer(RealtimeQuadRenderer):
 
 
 class RealtimeGradientQuadRenderer(RealtimeQuadRenderer):
-	def __init__(self, res = 512, AA = 0, disableMaxResAA = False, subdivMax = 5000, maxIters = 100):
-		super().__init__(res, AA, disableMaxResAA, maxIters)
+	def __init__(self, res = 512, AA = 0, maxIters = 100):
+		super().__init__(res, AA, maxIters)
 		self.cam.xPos = .5
 		self.cam.zoom = 1
 
