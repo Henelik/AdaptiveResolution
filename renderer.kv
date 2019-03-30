@@ -62,6 +62,10 @@
                     text: 'Gradient'
                     on_press: root.renderer.changeFractal('gradient')
                     group: 'fractal'
+                ActionToggleButton:
+                    text: 'Mandel (Full)'
+                    on_press: root.renderer.changeFractal('fullmandel')
+                    group: 'fractal'
             ActionGroup:
                 text: 'Color'
                 mode: 'spinner'

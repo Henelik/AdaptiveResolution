@@ -72,6 +72,49 @@ class CactusFullRenderer(FullRenderer): # a traditional Cactus renderer
 		return cactus.render(coords[0], coords[1], self.maxIters)
 
 
+
+class RealtimeFullRenderer():
+	def __init__(self, res = 512, AA = 0, maxIters = 100):
+		self.res = res
+		self.AA = AA
+		self.maxIters = maxIters
+		self.colorProfile = ColorConverter()
+		self.colorDivisor = maxIters/3
+
+		self.cam = Camera(res, res, xPos = -.5)
+
+	def renderPixel(self, coords):
+		return mandelbrot.render(coords[0], coords[1], self.maxIters)
+
+	def begin(self): # begin or restart the render (e.g. when the position changes)
+		self.image = np.zeros(shape=(self.res, self.res, 3), dtype=np.uint8)
+		self.currentX = 0
+		self.currentY = 0
+
+	def tick(self): # render and update a pixel
+		for i in range(14):
+			if self.currentY >= self.res:
+				return False
+			color = self.renderPixel(self.cam.convertPos(self.currentX, self.currentY))
+			if self.colorProfile.profileName != "greyscale":
+				c = self.colorProfile.convert((color/self.colorDivisor)%1)
+			else:
+				c = (color/self.maxIters)*16384
+			self.image[self.currentY][self.currentX] = c
+			self.currentX += 1
+			if self.currentX >= self.res:
+				self.currentX = 0
+				self.currentY += 1
+		return True
+
+	def updateImage(self):
+		pass
+
+	def fullUpdateImage(self):
+		pass
+
+
+
 class QuadRenderer(): # a non-interactive (not ticked) version of the quadtree renderer
 	def __init__(self, res = 512, AA = 0, disableMaxResAA = True, subdivMax = 5000, maxIters = 100):
 		self.res = res
@@ -176,11 +219,11 @@ class JuliaQuadRenderer(QuadRenderer):
 		return sum(pix)
 
 
+
 class RealtimeQuadRenderer(): # the realtime quadtree renderer
-	def __init__(self, res = 512, AA = 0, subdivMax = 5000, maxIters = 100):
+	def __init__(self, res = 512, AA = 0, maxIters = 100):
 		self.res = res
 		self.AA = AA
-		self.subdivMax = subdivMax
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
 		self.colorDivisor = maxIters/3
@@ -208,13 +251,34 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 	def begin(self): # begin or restart the render (e.g. when the position changes)
 		self.image = np.zeros(shape=(self.res, self.res, 3), dtype=np.uint8)
 		self.sparseArray = {}
-		s = self.res//2
 		self.sortLimit = 10
+		s1 = self.res//2
+		s2 = self.res//4
+		#self.quadList = [
+		#Quad(0, 0, s, self.sparseRender(0, 0, s)),
+		#Quad(0, s, s, self.sparseRender(0, s, s)),
+		#Quad(s, 0, s, self.sparseRender(s, 0, s)),
+		#Quad(s, s, s, self.sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
 		self.quadList = [
-		Quad(0, 0, s, self.sparseRender(0, 0, s)),
-		Quad(0, s, s, self.sparseRender(0, s, s)),
-		Quad(s, 0, s, self.sparseRender(s, 0, s)),
-		Quad(s, s, s, self.sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
+		Quad(0, 0, s2, self.sparseRender(0, 0, s2)),
+		Quad(0, s1, s2, self.sparseRender(0, s1, s2)),
+		Quad(s1, 0, s2, self.sparseRender(s1, 0, s2)),
+		Quad(s1, s1, s2, self.sparseRender(s1, s1, s2)), # the 4 top left subdivisions
+
+		Quad(s2, 0, s2, self.sparseRender(s2, 0, s2)),
+		Quad(s2, s1, s2, self.sparseRender(s2, s1, s2)),
+		Quad(s1+s2, 0, s2, self.sparseRender(s1+s2, 0, s2)),
+		Quad(s1+s2, s1, s2, self.sparseRender(s1+s2, s1, s2)), # the 4 top right subdivisions
+
+		Quad(0, s2, s2, self.sparseRender(0, s2, s2)),
+		Quad(0, s1+s2, s2, self.sparseRender(0, s1+s2, s2)),
+		Quad(s1, s2, s2, self.sparseRender(s1, s2, s2)),
+		Quad(s1, s1+s2, s2, self.sparseRender(s1, s1+s2, s2)), # the 4 bottom left subdivisions
+
+		Quad(s2, s2, s2, self.sparseRender(s2, s2, s2)),
+		Quad(s2, s1+s2, s2, self.sparseRender(s2, s1+s2, s2)),
+		Quad(s1+s2, s2, s2, self.sparseRender(s1+s2, s2, s2)),
+		Quad(s1+s2, s1+s2, s2, self.sparseRender(s1+s2, s1+s2, s2))] # the 4 bottom right subdivisions
 
 	def tick(self): # subdivide and update the highest priority quad
 		#t = time.clock()

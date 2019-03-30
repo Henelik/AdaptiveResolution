@@ -7,7 +7,7 @@ from kivy.graphics.transformation import Matrix
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 from kivy.graphics import Rectangle
-from quadrenderer.renderer import RealtimeQuadRenderer, RealtimeJuliaQuadRenderer, RealtimeCactusQuadRenderer, RealtimeGradientQuadRenderer
+from quadrenderer.renderer import RealtimeQuadRenderer, RealtimeJuliaQuadRenderer, RealtimeCactusQuadRenderer, RealtimeGradientQuadRenderer, RealtimeFullRenderer
 
 import time
 
@@ -20,12 +20,13 @@ class RendererWidget(Widget):
 		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte", colorfmt = "bgr")
 		with self.canvas:
 			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
+		#self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		self.renderer.begin()
 		Clock.schedule_interval(self.tick, 1 / 30.)
 
 	def tick(self, dt):
-		#t = time.time()
+		t = time.time()
 		for i in range(150):
 			if not self.renderer.tick():
 				break
@@ -34,7 +35,7 @@ class RendererWidget(Widget):
 		self.renderer.updateImage()
 		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt = "bgr")
 		self.canvas.ask_update()
-		#print("Total update time was " + str(time.time()-t))
+		print("Total update time was " + str(time.time()-t))
 
 	def changeFractal(self, fractal):
 		color = self.renderer.colorProfile.profileName
@@ -46,6 +47,8 @@ class RendererWidget(Widget):
 			self.renderer = RealtimeCactusQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		elif fractal == 'gradient':
 			self.renderer = RealtimeGradientQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
+		elif fractal == 'fullmandel':
+			self.renderer = RealtimeFullRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		else:
 			raise(TypeError)
 		self.renderer.colorProfile.loadProfile(color)
