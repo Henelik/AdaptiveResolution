@@ -1,4 +1,4 @@
-from scipy.misc import imsave
+import imageio
 import numpy as np
 import os
 import cv2
@@ -226,7 +226,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		self.AA = AA
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
-		self.colorDivisor = maxIters/3
+		self.colorDivisor = maxIters/2
 
 		self.cam = Camera(res, res, xPos = -.5)
 
@@ -300,10 +300,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		#t = time.clock()
 		for q in self.quadList:
 			if not q.updated:
-				if self.colorProfile.profileName != "greyscale":
-					c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
-				else:
-					c = (q.color/self.maxIters)*16384
+				c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
 				self.image[q.y:q.y+q.size, q.x:q.x+q.size] = c
 				q.updated = True
 		#print("Image update time was " + str(time.clock() - t))
@@ -312,10 +309,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		# This is a VERY expensive operation, and can take upwards of a second
 		#t = time.clock()
 		for q in self.quadList:
-			if self.colorProfile.profileName != "greyscale":
-				c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
-			else:
-				c = (q.color/self.maxIters)*16384
+			c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
 			self.image[q.y:q.y+q.size, q.x:q.x+q.size] = c
 			q.updated = True
 		#print("Full update time was " + str(time.clock() - t))
@@ -334,7 +328,7 @@ class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
 class RealtimeCactusQuadRenderer(RealtimeQuadRenderer):
 	def __init__(self, res = 512, AA = 0, maxIters = 100):
 		super().__init__(res, AA, maxIters)
-		self.cam.xPos = 0
+		self.cam = Camera(res, res, xPos = 0)
 
 	def renderPixel(self, coords):
 		return cactus.render(coords[0], coords[1], self.maxIters)
@@ -343,11 +337,11 @@ class RealtimeCactusQuadRenderer(RealtimeQuadRenderer):
 class RealtimeGradientQuadRenderer(RealtimeQuadRenderer):
 	def __init__(self, res = 512, AA = 0, maxIters = 100):
 		super().__init__(res, AA, maxIters)
-		self.cam.xPos = .5
-		self.cam.zoom = 1
+		self.cam = Camera(res, res, xPos = .5, zoom = 1)
+		#self.colorDivisor = 1
 
 	def renderPixel(self, coords):
-		return gradient.render(coords[0], coords[1])
+		return gradient.render(coords[0], coords[1], self.maxIters)
 
 
 class Quad():
@@ -375,6 +369,10 @@ class ColorConverter():
 	def convert(self, scalar): # take a ratio and convert it to an RGB int ala Blender's Color Ramp node
 		if scalar == 0: # exception for converging quads
 			return(0, 0, 0)
+		if self.profileName == "greyscale":
+			l = 256
+			c = int(scalar**(.25)*l*3%l)
+			return (c, c, c)
 		l = len(self.ramp)
 		return self.ramp[int(scalar**(.25)*l*3%l)]
 
@@ -408,7 +406,7 @@ if __name__ == "__main__":
 	if not os.path.exists('renders'):
 		os.makedirs('renders')
 	
-	imsave('renders/mandel.png', FullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100).render())
+	imageio.imwrite('renders/mandel.png', FullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100).render())
 
 	quadRenderer = RealtimeQuadRenderer(res = res, AA = 8, maxIters = 1000)
 	quadRenderer.begin()
@@ -419,4 +417,4 @@ if __name__ == "__main__":
 
 	quadRenderer.updateImage()
 	print("Quad render time was " + str(time.time() - t))
-	imsave('renders/quadMandel.png', quadRenderer.image)
+	imageio.imwrite('renders/quadMandel.png', quadRenderer.image)
