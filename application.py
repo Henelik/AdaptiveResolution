@@ -23,7 +23,7 @@ class RendererWidget(Widget):
 		#self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		self.renderer.begin()
-		Clock.schedule_interval(self.tick, 1 / 30.)
+		Clock.schedule_once(self.tick, 1 / 30.)
 
 	def tick(self, dt):
 		t = time.time()
@@ -35,7 +35,8 @@ class RendererWidget(Widget):
 		self.renderer.updateImage()
 		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt = "bgr")
 		self.canvas.ask_update()
-		print("Total update time was " + str(time.time()-t))
+		Clock.schedule_once(self.tick, 0)#(time.time()-t)*.1)
+		#print("Total update time was " + str(time.time()-t))
 
 	def changeFractal(self, fractal):
 		color = self.renderer.colorProfile.profileName
