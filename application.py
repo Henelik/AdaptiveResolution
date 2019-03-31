@@ -106,7 +106,7 @@ class RendererWidget(Widget):
 		i = 0
 		while os.path.exists('screenshots/' + self.fractal + str(i) + '.png'):
 			i += 1
-		imageio.imwrite('screenshots/' + self.fractal + str(i) + '.png', self.renderer.image[:, ::-1, ::-1])
+		imageio.imwrite('screenshots/' + self.fractal + str(i) + '.png', self.renderer.image[::-1, :, ::-1])
 
 
 class RenderScatter(Scatter):
