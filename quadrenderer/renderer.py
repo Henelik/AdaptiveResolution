@@ -18,12 +18,12 @@ class FullRenderer(): # a "traditional" per-pixel Mandelbrot renderer
 
 	def render(self):
 		t = time.clock()
-		image = np.zeros((self.xRes, self.yRes, 3), dtype=np.uint32)
+		image = np.zeros((self.xRes, self.yRes, 3), dtype=np.uint8)
 		for y in range(self.yRes):
 			for x in range(self.xRes):
 				pix = []
 				AAList = [(x+.25, y+.25), (x+.75, y+.75), (x+.25, y+.75), (x+.75, y+.25), (x+.5, y+.1), (x+.5, y+.9), (x+.1, y+.5), (x+.9, y+.5)]
-				for i in range(self.AA+1):
+				for i in range(self.AA):
 					pix.append(self.renderPixel(self.cam.convertPos(AAList[i][0], AAList[i][1])))
 				col = sum(pix)
 				image[y][x] = (col, col, col)
@@ -73,10 +73,10 @@ class CactusFullRenderer(FullRenderer): # a traditional Cactus renderer
 
 
 
-class RealtimeFullRenderer():
+class ScanRenderer():
 	def __init__(self, res = 512, AA = 0, maxIters = 100):
 		self.res = res
-		self.AA = AA
+		self.AA = min(AA, 7)
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
 		self.colorDivisor = maxIters/3
@@ -95,7 +95,12 @@ class RealtimeFullRenderer():
 		for i in range(14):
 			if self.currentY >= self.res:
 				return False
-			color = self.renderPixel(self.cam.convertPos(self.currentX, self.currentY))
+			pix = []
+			x, y = self.currentX, self.currentY
+			AAList = [(x+.25, y+.25), (x+.75, y+.75), (x+.25, y+.75), (x+.75, y+.25), (x+.5, y+.1), (x+.5, y+.9), (x+.1, y+.5), (x+.9, y+.5)]
+			for i in range(self.AA):
+				pix.append(self.renderPixel(self.cam.convertPos(AAList[i][0], AAList[i][1])))
+			color = sum(pix)/len(pix)
 			if self.colorProfile.profileName != "greyscale":
 				c = self.colorProfile.convert((color/self.colorDivisor)%1)
 			else:
@@ -112,6 +117,16 @@ class RealtimeFullRenderer():
 
 	def fullUpdateImage(self):
 		pass
+
+
+class CactusScanRenderer(ScanRenderer):
+	def renderPixel(self, coords):
+		return cactus.render(coords[0], coords[1], self.maxIters)
+
+
+class JuliaScanRenderer(ScanRenderer):
+	def renderPixel(self, coords):
+		return julia.render(coords[0], coords[1], .3, .5, self.maxIters)
 
 
 
@@ -288,7 +303,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 			self.quadList.sort(key = lambda q: int(q.priority), reverse = True)
 			self.sortLimit = len(self.quadList)//2
 		if self.quadList[0].priority == 0:
-			print("Can't subdivide further!")
+			#print("Can't subdivide further!")
 			return False
 		current = self.quadList.pop(0)
 		newSize = current.size//2
@@ -401,21 +416,21 @@ class Camera(): # This class is responsible for handling the conversion from pix
 
 
 if __name__ == "__main__":
-	res = 256
-	mandelR = FullRenderer(xRes = res, yRes = res, AA = 8, maxIters = 1000)
-
 	if not os.path.exists('renders'):
 		os.makedirs('renders')
+	for res in (16, 32, 64, 128, 256, 512, 1024):
+		#renderer = RealtimeQuadRenderer(res = res, AA = 8, maxIters = 1000)
+		#renderer = ScanRenderer(res = res, AA = 8, maxIters = 1000)
+		#renderer = RealtimeJuliaQuadRenderer(res = res, AA = 8, maxIters = 1000)
+		renderer = JuliaScanRenderer(res = res, AA = 8, maxIters = 1000)
+		#renderer = RealtimeCactusQuadRenderer(res = res, AA = 8, maxIters = 1000)
+		#renderer = CactusScanRenderer(res = res, AA = 8, maxIters = 1000)
+		renderer.begin()
+		t = time.time()
 	
-	imageio.imwrite('renders/mandel.png', FullRenderer(xRes = res, yRes = res, AA = 4, maxIters = 100).render())
-
-	quadRenderer = RealtimeQuadRenderer(res = res, AA = 8, maxIters = 1000)
-	quadRenderer.begin()
-	t = time.time()
-
-	while quadRenderer.tick():
-		pass
-
-	quadRenderer.updateImage()
-	print("Quad render time was " + str(time.time() - t))
-	imageio.imwrite('renders/quadMandel.png', quadRenderer.image)
+		while renderer.tick():
+			pass
+	
+		renderer.updateImage()
+		print("Render time was " + str(time.time() - t))
+	imageio.imwrite('renders/julia.png', renderer.image)

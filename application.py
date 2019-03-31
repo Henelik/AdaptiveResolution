@@ -8,7 +8,7 @@ from kivy.graphics.texture import Texture
 from kivy.clock import Clock
 from kivy.graphics import Rectangle
 
-from quadrenderer.renderer import RealtimeQuadRenderer, RealtimeJuliaQuadRenderer, RealtimeCactusQuadRenderer, RealtimeGradientQuadRenderer, RealtimeFullRenderer
+from quadrenderer.renderer import RealtimeQuadRenderer, RealtimeJuliaQuadRenderer, RealtimeCactusQuadRenderer, RealtimeGradientQuadRenderer, ScanRenderer
 
 import imageio
 import time
@@ -23,6 +23,8 @@ class RendererWidget(Widget):
 		self.rampValue = 3
 		self.fractal = 'mandelbrot'
 		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte", colorfmt = "bgr")
+		self.juliacx = .3
+		self.juliacy = .5
 		with self.canvas:
 			Rectangle(texture=self.texture, pos=(0, 0), size=(self.res, self.res))
 		self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
@@ -48,12 +50,14 @@ class RendererWidget(Widget):
 			self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		elif fractal == 'julia':
 			self.renderer = RealtimeJuliaQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
+			self.renderer.cx = self.juliacx
+			self.renderer.cy = self.juliacy
 		elif fractal == 'cactus':
 			self.renderer = RealtimeCactusQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		elif fractal == 'gradient':
 			self.renderer = RealtimeGradientQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		elif fractal == 'scanline':
-			self.renderer = RealtimeFullRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
+			self.renderer = ScanRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		else:
 			raise(TypeError)
 		self.renderer.colorProfile.loadProfile(color)
@@ -80,6 +84,20 @@ class RendererWidget(Widget):
 			self.rampValue = value
 			self.renderer.colorDivisor = self.maxIters/value/value
 			self.renderer.fullUpdateImage()
+
+	def changeJuliacx(self, value):
+		if value != self.juliacx:
+			self.juliacx = value
+			if self.fractal == 'julia':
+				self.renderer.cx = value
+				self.renderer.begin()
+
+	def changeJuliacy(self, value):
+		if value != self.juliacy:
+			self.juliacy = value
+			if self.fractal == 'julia':
+				self.renderer.cy = value
+				self.renderer.begin()
 
 	def saveImage(self):
 		if not os.path.exists('screenshots'):

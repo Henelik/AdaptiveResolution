@@ -4,21 +4,11 @@
         important: True
         size_hint: (.3, .5)
         orientation: 'vertical'
-        Button:
-            text: 'Test'
-            on_press: root.renderer.changeColor("golden")
-            width: 80
-            size_hint: (1, 1)
-        Button:
-            text: 'Test2'
-            on_press: root.renderer.changeColor("golden")
-            width: 80
-            size_hint: (1, 1)
-        Button:
-            text: 'Test3'
-            on_press: root.renderer.changeColor("golden")
-            width: 80
-            size_hint: (1, 1)
+        #Button:
+        #    text: 'Test'
+        #    on_press: root.renderer.changeColor("golden")
+        #    width: 80
+        #    size_hint: (1, 1)
         BoxLayout:
             important: True
             width: 80
@@ -34,6 +24,36 @@
                 width: 80
                 size_hint: (0.1, None)
                 on_touch_up: root.renderer.changeRamp(self.value)
+        BoxLayout:
+            important: True
+            width: 80
+            size_hint: (1, 1)
+            Label:
+                text: 'Julia Set cx'
+                width: 80
+                size_hint: (0.1, None)
+            Slider:
+                min: -1
+                max: 1
+                value: .3
+                width: 80
+                size_hint: (0.1, None)
+                on_touch_move: root.renderer.changeJuliacx(self.value)
+        BoxLayout:
+            important: True
+            width: 80
+            size_hint: (1, 1)
+            Label:
+                text: 'Julia Set cy'
+                width: 80
+                size_hint: (0.1, None)
+            Slider:
+                min: -1
+                max: 1
+                value: .5
+                width: 80
+                size_hint: (0.1, None)
+                on_touch_move: root.renderer.changeJuliacy(self.value)
 	ActionBar:
 		pos_hint: {'top':1}
         important: True
@@ -46,13 +66,13 @@
                 text: 'File'
                 mode: 'spinner'
                 width: 90
-                ActionButton:
-                    text: 'Open'
+                #ActionButton:
+                #    text: 'Open'
                 ActionButton:
                     text: 'Save Image'
                     on_press: root.renderer.saveImage()
-                ActionButton:
-                    text: 'Save Coordinate'
+                #ActionButton:
+                #    text: 'Save Coordinate'
                 ActionButton:
                     text: 'Quit'
                     on_press: app.Quit()
@@ -103,6 +123,10 @@
                 ActionToggleButton:
                     text: 'Incandescent'
                     on_press: root.renderer.changeColor("incandescent")
+                    group: 'color'
+                ActionToggleButton:
+                    text: 'Rainbow'
+                    on_press: root.renderer.changeColor("rainbow")
                     group: 'color'
             ActionGroup:
                 text: 'Color Mode'
