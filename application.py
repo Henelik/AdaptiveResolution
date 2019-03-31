@@ -38,9 +38,10 @@ class RendererWidget(Widget):
 				break
 		#print("Total iteration time was " + str(time.time()-t))
 		#t = time.time()
-		self.renderer.updateImage()
-		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt = "bgr")
-		self.canvas.ask_update()
+		if i != 0:
+			self.renderer.updateImage()
+			self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt = "bgr")
+			self.canvas.ask_update()
 		Clock.schedule_once(self.tick, 0)
 		#print("Total update time was " + str(time.time()-t))
 
