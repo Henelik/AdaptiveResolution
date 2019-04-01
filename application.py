@@ -3,6 +3,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.scatter import Scatter
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.stacklayout import StackLayout
+from kivy.uix.textinput import TextInput
 from kivy.graphics.transformation import Matrix
 from kivy.graphics.texture import Texture
 from kivy.clock import Clock
@@ -13,6 +14,7 @@ from quadrenderer.renderer import RealtimeQuadRenderer, RealtimeJuliaQuadRendere
 import imageio
 import time
 import os
+import re
 
 class RendererWidget(Widget):
 	def __init__(self, res = 512, AA = 4, maxIters = 1000, *args, **kwargs):
@@ -104,6 +106,14 @@ class RendererWidget(Widget):
 				self.renderer.cy = value
 				self.renderer.begin()
 
+	def changeMaxIters(self, text):
+		value = int(float(text))
+		if value != self.maxIters:
+			self.maxIters = value
+			self.renderer.maxIters = value
+			self.renderer.begin()
+		return str(value)
+
 	def saveImage(self):
 		if not os.path.exists('screenshots'):
 			os.makedirs('screenshots')
@@ -138,11 +148,22 @@ class RenderScatter(Scatter):
 		self.add_widget(renderer)
 
 
+class FloatInput(TextInput):
+    pat = re.compile('[^0-9]')
+    def insert_text(self, substring, from_undo=False):
+        pat = self.pat
+        if '.' in self.text:
+            s = re.sub(pat, '', substring)
+        else:
+            s = '.'.join([re.sub(pat, '', s) for s in substring.split('.', 1)])
+        return super(FloatInput, self).insert_text(s, from_undo=from_undo)
+
+
 class RootWidget(FloatLayout):
 	def __init__(self, **kwargs):
 		super().__init__(**kwargs)
 		self.scatter = RenderScatter(auto_bring_to_front = False, do_rotation = False)
-		self.renderer = RendererWidget(res = 1024, AA = 8, maxIters = 2000)
+		self.renderer = RendererWidget(res = 1024, AA = 8, maxIters = 1000)
 		self.scatter.set_renderer(self.renderer)
 		self.add_widget(self.scatter, index = 3)
 

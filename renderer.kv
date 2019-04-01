@@ -29,6 +29,20 @@
             width: 80
             size_hint: (1, 1)
             Label:
+                text: 'Max IFF Iterations'
+                width: 80
+                size_hint: (0.1, None)
+            FloatInput:
+                multiline: False
+                text: '1000'
+                width: 80
+                size_hint: (0.1, None)
+                on_text_validate: self.text = root.renderer.changeMaxIters(self.text)
+        BoxLayout:
+            important: True
+            width: 80
+            size_hint: (1, 1)
+            Label:
                 text: 'Julia Set cx'
                 width: 80
                 size_hint: (0.1, None)
