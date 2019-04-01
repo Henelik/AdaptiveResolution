@@ -68,10 +68,14 @@ class RendererWidget(Widget):
 	def changeColor(self, color):
 		self.renderer.colorProfile.loadProfile(color)
 		self.renderer.fullUpdateImage()
+		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt = "bgr")
+		self.canvas.ask_update()
 
 	def changeColorMode(self, mode):
 		self.renderer.colorSlice = mode
 		self.renderer.fullUpdateImage()
+		self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt = "bgr")
+		self.canvas.ask_update()
 
 	def changeView(self, x, y, zoom):
 		zr = self.renderer.cam.zoom/zoom
