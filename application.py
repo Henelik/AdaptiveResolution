@@ -87,10 +87,9 @@ class RendererWidget(Widget):
 		self.renderer.begin()
 
 	def changeRamp(self, value):
-		if value != self.rampValue:
-			self.rampValue = value
-			self.renderer.colorDivisor = self.maxIters/value/value
-			self.renderer.fullUpdateImage()
+		self.rampValue = value
+		self.renderer.colorDivisor = self.maxIters/value**.5
+		self.renderer.fullUpdateImage()
 
 	def changeJuliacx(self, value):
 		if value != self.juliacx:
@@ -112,6 +111,7 @@ class RendererWidget(Widget):
 			self.maxIters = value
 			self.renderer.maxIters = value
 			self.renderer.begin()
+			self.changeRamp(self.rampValue)
 		return str(value)
 
 	def saveImage(self):
