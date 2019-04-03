@@ -336,6 +336,7 @@ class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
 		super().__init__(res, AA, maxIters)
 		self.cx = cx
 		self.cy = cy
+		self.cam.xPos = 0
 
 	def renderPixel(self, coords):
 		return julia.render(coords[0], coords[1], self.cx, self.cy, self.maxIters)
