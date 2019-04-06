@@ -79,7 +79,7 @@ class ScanRenderer():
 		self.AA = min(AA, 7)
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
-		self.colorDivisor = maxIters/3
+		self.colorDivisor = maxIters/3**.5
 
 		self.cam = Camera(res, res, xPos = -.5)
 
@@ -136,7 +136,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		self.AA = AA
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
-		self.colorDivisor = maxIters/3
+		self.colorDivisor = maxIters/3**.5
 		self.colorSlice = 0
 
 		self.cam = Camera(res, res, xPos = -.5)
@@ -166,11 +166,6 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		s1 = self.res//2
 		s2 = self.res//4
 		s3 = s1+s2
-		#self.quadList = [
-		#Quad(0, 0, s, self.sparseRender(0, 0, s)),
-		#Quad(0, s, s, self.sparseRender(0, s, s)),
-		#Quad(s, 0, s, self.sparseRender(s, 0, s)),
-		#Quad(s, s, s, self.sparseRender(s, s, s))] # start with 4 quads that are 1/2 the image size on a side
 		self.quadList = [
 		Quad(0 , 0 , s2, self.sparseRender(0 , 0 , s2)),
 		Quad(0 , s1, s2, self.sparseRender(0 , s1, s2)),
@@ -193,38 +188,31 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		Quad(s3, s3, s2, self.sparseRender(s3, s3, s2))] # the 4 bottom right subdivisions
 
 	def tick(self): # subdivide and update the highest priority quad
-		#t = time.clock()
 		self.sortLimit -= 1
 		if self.sortLimit <= 0 or self.quadList[0].priority == 0:
 			self.quadList.sort(key = lambda q: int(q.priority), reverse = True)
 			self.sortLimit = len(self.quadList)//2
 		if self.quadList[0].priority == 0:
-			#print("Can't subdivide further!")
 			return False
 		current = self.quadList.pop(0)
 		newSize = current.size//2
 		for j in [(current.x, current.y), (current.x+newSize, current.y), (current.x, current.y+newSize), (current.x+newSize, current.y+newSize)]:
 			self.quadList.append(Quad(j[0], j[1], newSize, self.sparseRender(j[0], j[1], newSize)))
-		#print("Tick time was " + str(time.clock() - t))
 		return True
 
 	def updateImage(self): # update the image (e.g. to display it while rendering)
-		#t = time.clock()
 		for q in self.quadList:
 			if not q.updated:
 				c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
 				self.image[q.y:q.y+q.size, q.x:q.x+q.size] = np.append(c[self.colorSlice:], c[:self.colorSlice])
 				q.updated = True
-		#print("Image update time was " + str(time.clock() - t))
 
 	def fullUpdateImage(self): # update the entire image (e.g. when the color changes)
-		# This is a VERY expensive operation, and can take upwards of a second
-		#t = time.clock()
+		# This is a VERY expensive operation, and can take upwards of a second on a 1024x1024 image
 		for q in self.quadList:
 			c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
 			self.image[q.y:q.y+q.size, q.x:q.x+q.size] = np.append(c[self.colorSlice:], c[:self.colorSlice])
 			q.updated = True
-		#print("Full update time was " + str(time.clock() - t))
 
 
 class RealtimeJuliaQuadRenderer(RealtimeQuadRenderer):
