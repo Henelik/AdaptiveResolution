@@ -163,6 +163,7 @@ class QuadRenderer(): # a non-interactive (not ticked) version of the quadtree r
 
 		s1 = self.res//2
 		s2 = self.res//4
+		s3 = s1+s2
 		#quadList = [
 		#Quad(0, 0, s, self.sparseRender(0, 0, s)),
 		#Quad(0, s, s, self.sparseRender(0, s, s)),
@@ -177,18 +178,18 @@ class QuadRenderer(): # a non-interactive (not ticked) version of the quadtree r
 
 		Quad(s2, 0, s2, self.sparseRender(s2, 0, s2)),
 		Quad(s2, s1, s2, self.sparseRender(s2, s1, s2)),
-		Quad(s1+s2, 0, s2, self.sparseRender(s1+s2, 0, s2)),
-		Quad(s1+s2, s1, s2, self.sparseRender(s1+s2, s1, s2)), # the 4 top right subdivisions
+		Quad(s1+s2, 0, s2, self.sparseRender(s3, 0, s2)),
+		Quad(s1+s2, s1, s2, self.sparseRender(s3, s1, s2)), # the 4 top right subdivisions
 
 		Quad(0, s2, s2, self.sparseRender(0, s2, s2)),
-		Quad(0, s1+s2, s2, self.sparseRender(0, s1+s2, s2)),
+		Quad(0, s1+s2, s2, self.sparseRender(0, s3, s2)),
 		Quad(s1, s2, s2, self.sparseRender(s1, s2, s2)),
-		Quad(s1, s1+s2, s2, self.sparseRender(s1, s1+s2, s2)), # the 4 bottom left subdivisions
+		Quad(s1, s1+s2, s2, self.sparseRender(s1, s3, s2)), # the 4 bottom left subdivisions
 
 		Quad(s2, s2, s2, self.sparseRender(s2, s2, s2)),
-		Quad(s2, s1+s2, s2, self.sparseRender(s2, s1+s2, s2)),
-		Quad(s1+s2, s2, s2, self.sparseRender(s1+s2, s2, s2)),
-		Quad(s1+s2, s1+s2, s2, self.sparseRender(s1+s2, s1+s2, s2))] # the 4 bottom right subdivisions
+		Quad(s2, s1+s2, s2, self.sparseRender(s2, s3, s2)),
+		Quad(s1+s2, s2, s2, self.sparseRender(s3, s2, s2)),
+		Quad(s1+s2, s1+s2, s2, self.sparseRender(s3, s3, s2))] # the 4 bottom right subdivisions
 		sortLimit = 0 # heuristically limit how often we sort to improve performance
 		subdivisions = 0
 		while subdivisions < self.subdivMax:
