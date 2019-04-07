@@ -80,6 +80,7 @@ class ScanRenderer():
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
 		self.colorDivisor = maxIters/3**.5
+		self.colorSlice = 0
 
 		self.cam = Camera(res, res, xPos = -.5)
 
@@ -92,7 +93,7 @@ class ScanRenderer():
 		self.currentY = 0
 
 	def tick(self): # render and update a pixel
-		for i in range(14):
+		for i in range(16):
 			if self.currentY >= self.res:
 				return False
 			pix = []
@@ -101,11 +102,8 @@ class ScanRenderer():
 			for i in range(self.AA):
 				pix.append(self.renderPixel(self.cam.convertPos(AAList[i][0], AAList[i][1])))
 			color = sum(pix)/len(pix)
-			if self.colorProfile.profileName != "greyscale":
-				c = self.colorProfile.convert((color/self.colorDivisor)%1)
-			else:
-				c = (color/self.maxIters)*16384
-			self.image[self.currentY][self.currentX] = c
+			c = self.colorProfile.convert((color/self.colorDivisor)%1)
+			self.image[self.currentY][self.currentX] = np.append(c[self.colorSlice:], c[:self.colorSlice])
 			self.currentX += 1
 			if self.currentX >= self.res:
 				self.currentX = 0
