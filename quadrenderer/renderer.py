@@ -272,10 +272,10 @@ class ColorConverter():
 			return(0, 0, 0)
 		if self.profileName == "greyscale":
 			l = 256
-			c = int(scalar**(.25)*l*3%l)
+			c = int(scalar**.25*l%l)
 			return (c, c, c)
 		l = len(self.ramp)
-		return self.ramp[int(scalar**(.25)*l*3%l)]
+		return self.ramp[int(scalar**.25*l%l)]
 
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
