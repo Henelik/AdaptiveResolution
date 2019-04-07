@@ -154,7 +154,7 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 			else:
 				pix.append(self.renderPixel(self.cam.convertPos(i[0], i[1])))
 				self.sparseArray[i] = pix[-1]
-		return sum(pix)/len(pix)
+		return pix
 
 	def renderPixel(self, coords):
 		return mandelbrot.render(coords[0], coords[1], self.maxIters)
@@ -239,23 +239,25 @@ class RealtimeGradientQuadRenderer(RealtimeQuadRenderer):
 	def __init__(self, res = 512, AA = 0, maxIters = 100):
 		super().__init__(res, AA, maxIters)
 		self.cam = Camera(res, res, xPos = .5, zoom = 1)
-		#self.colorDivisor = 1
 
 	def renderPixel(self, coords):
 		return gradient.render(coords[0], coords[1], self.maxIters)
 
 
 class Quad():
-	def __init__(self, x, y, size, color):
+	def __init__(self, x, y, size, colorList):
 		self.x = x
 		self.y = y
 		self.size = size
-		self.color = color # the scalar color of the quad (based on iterations till convergence)
+		self.color = sum(colorList)/len(colorList) # the scalar color of the quad (based on iterations till convergence)
 		self.updated = False # each quad keeps track of whether it has been added to the image or not
 		if size <= 1:
 			self.priority = 0
 		else:
-			self.priority = color*size*size
+			if len(set(colorList)) > 1:
+				self.priority = self.color*size*size
+			else:
+				self.priority = 0
 
 
 class ColorConverter():
@@ -307,15 +309,15 @@ if __name__ == "__main__":
 		#renderer = RealtimeQuadRenderer(res = res, AA = 8, maxIters = 1000)
 		#renderer = ScanRenderer(res = res, AA = 8, maxIters = 1000)
 		#renderer = RealtimeJuliaQuadRenderer(res = res, AA = 8, maxIters = 1000)
-		renderer = JuliaScanRenderer(res = res, AA = 8, maxIters = 1000)
+		#renderer = JuliaScanRenderer(res = res, AA = 8, maxIters = 1000)
 		#renderer = RealtimeCactusQuadRenderer(res = res, AA = 8, maxIters = 1000)
-		#renderer = CactusScanRenderer(res = res, AA = 8, maxIters = 1000)
-		renderer.begin()
+		renderer = CactusScanRenderer(res = res, AA = 8, maxIters = 1000)
 		t = time.time()
+		renderer.begin()
 	
 		while renderer.tick():
 			pass
 	
 		renderer.updateImage()
-		print("Render time was " + str(time.time() - t))
+		print("Render time at " + str(res) + " "*(4-len(str(res))) + " was " + str(time.time() - t))
 	imageio.imwrite('renders/julia.png', renderer.image)
