@@ -22,7 +22,7 @@ class RendererWidget(Widget):
 		self.res = res
 		self.AA = AA
 		self.maxIters = maxIters
-		self.rampValue = 3
+		self.rampValue = 1
 		self.fractal = 'mandelbrot'
 		self.texture = Texture.create(size=(self.res, self.res), bufferfmt="ubyte", colorfmt = "bgr")
 		self.juliacx = .3
@@ -89,7 +89,7 @@ class RendererWidget(Widget):
 	def changeRamp(self, value):
 		if value != self.rampValue:
 			self.rampValue = value
-			self.renderer.colorDivisor = self.maxIters/value**.5
+			self.renderer.colorProfile.multiple = value
 			self.renderer.fullUpdateImage()
 
 	def changeJuliacx(self, value):

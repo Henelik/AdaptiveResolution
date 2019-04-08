@@ -79,7 +79,6 @@ class ScanRenderer():
 		self.AA = min(AA, 7)
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
-		self.colorDivisor = maxIters/3**.5
 		self.colorSlice = 0
 
 		self.cam = Camera(res, res, xPos = -.5)
@@ -102,7 +101,7 @@ class ScanRenderer():
 			for i in range(self.AA):
 				pix.append(self.renderPixel(self.cam.convertPos(AAList[i][0], AAList[i][1])))
 			color = sum(pix)/len(pix)
-			c = self.colorProfile.convert((color/self.colorDivisor)%1)
+			c = self.colorProfile.convert(color/self.maxIters)
 			self.image[self.currentY][self.currentX] = np.append(c[self.colorSlice:], c[:self.colorSlice])
 			self.currentX += 1
 			if self.currentX >= self.res:
@@ -134,7 +133,6 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		self.AA = AA
 		self.maxIters = maxIters
 		self.colorProfile = ColorConverter()
-		self.colorDivisor = maxIters/3**.5
 		self.colorSlice = 0
 
 		self.cam = Camera(res, res, xPos = -.5)
@@ -201,14 +199,14 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 	def updateImage(self): # update the image (e.g. to display it while rendering)
 		for q in self.quadList:
 			if not q.updated:
-				c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
+				c = self.colorProfile.convert(q.color/self.maxIters)
 				self.image[q.y:q.y+q.size, q.x:q.x+q.size] = np.append(c[self.colorSlice:], c[:self.colorSlice])
 				q.updated = True
 
 	def fullUpdateImage(self): # update the entire image (e.g. when the color changes)
 		# This is a VERY expensive operation, and can take upwards of a second on a 1024x1024 image
 		for q in self.quadList:
-			c = self.colorProfile.convert((q.color/self.colorDivisor)%1)
+			c = self.colorProfile.convert(q.color/self.maxIters)
 			self.image[q.y:q.y+q.size, q.x:q.x+q.size] = np.append(c[self.colorSlice:], c[:self.colorSlice])
 			q.updated = True
 
@@ -261,6 +259,7 @@ class Quad():
 class ColorConverter():
 	def __init__(self, profileName = "greyscale"):
 		self.loadProfile(profileName)
+		self.multiple = 1
 
 	def loadProfile(self, profileName):
 		self.profileName = profileName
@@ -271,11 +270,11 @@ class ColorConverter():
 		if scalar == 0: # exception for converging quads
 			return(0, 0, 0)
 		if self.profileName == "greyscale":
-			l = 256
-			c = int(scalar**.25*l%l)
+			l = 512
+			c = int(scalar**.25*self.multiple*l%l)
 			return (c, c, c)
 		l = len(self.ramp)
-		return self.ramp[int(scalar**.25*l%l)]
+		return self.ramp[int(scalar**.25*self.multiple*l%l)]
 
 
 class Camera(): # This class is responsible for handling the conversion from pixel position to mathematical space
