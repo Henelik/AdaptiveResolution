@@ -64,6 +64,7 @@ class RendererWidget(Widget):
 		else:
 			raise(TypeError)
 		self.renderer.colorProfile.loadProfile(color)
+		self.renderer.colorProfile.multiple = self.rampValue
 		self.renderer.begin()
 		self.fractal = fractal
 
