@@ -53,6 +53,7 @@
                 width: 80
                 size_hint: (0.1, None)
                 on_touch_move: root.renderer.changeJuliacx(self.value)
+                on_touch_up: root.renderer.changeJuliacx(self.value)
         BoxLayout:
             important: True
             width: 80
@@ -68,6 +69,7 @@
                 width: 80
                 size_hint: (0.1, None)
                 on_touch_move: root.renderer.changeJuliacy(self.value)
+                on_touch_up: root.renderer.changeJuliacy(self.value)
 	ActionBar:
 		pos_hint: {'top':1}
         important: True
