@@ -32,20 +32,17 @@ class RendererWidget(Widget):
 		self.renderer = RealtimeQuadRenderer(res = self.res, AA = self.AA, maxIters = self.maxIters)
 		self.renderer.begin()
 		Clock.schedule_once(self.tick, 0)
+		#print(App.get_running_app().path)
 
 	def tick(self, dt):
-		#t = time.time()
 		for i in range(150):
 			if not self.renderer.tick():
 				break
-		#print("Total iteration time was " + str(time.time()-t))
-		#t = time.time()
 		if i != 0:
 			self.renderer.updateImage()
 			self.texture.blit_buffer(self.renderer.image.tostring(), bufferfmt="ubyte", colorfmt = "bgr")
 			self.canvas.ask_update()
 		Clock.schedule_once(self.tick, 0)
-		#print("Total update time was " + str(time.time()-t))
 
 	def changeFractal(self, fractal):
 		color = self.renderer.colorProfile.profileName
@@ -116,13 +113,37 @@ class RendererWidget(Widget):
 			self.changeRamp(self.rampValue)
 		return str(value)
 
+	def ensurePath(self, path):
+		if not os.path.exists(path):
+			os.makedirs(path)
+
 	def saveImage(self):
-		if not os.path.exists('screenshots'):
-			os.makedirs('screenshots')
+		self.ensurePath(App.get_running_app().path + '/screenshots/')
 		i = 0
-		while os.path.exists('screenshots/' + self.fractal + str(i) + '.png'):
+		while os.path.exists(App.get_running_app().path + '/screenshots/' + self.fractal + str(i) + '.png'):
 			i += 1
-		imageio.imwrite('screenshots/' + self.fractal + str(i) + '.png', self.renderer.image[::-1, :, ::-1])
+		imageio.imwrite(App.get_running_app().path + '/screenshots/' + self.fractal + str(i) + '.png', self.renderer.image[::-1, :, ::-1])
+
+	def saveSettings(self):
+		self.ensurePath(App.get_running_app().path + '/saves/')
+		i = 0
+		while os.path.exists(App.get_running_app().path + '/saves/' + self.fractal + str(i) + '.png'):
+			i += 1
+		file = open(App.get_running_app().path + '/saves/', 'w')
+		file.write(str(self.renderer.cam.xPos))
+		file.write(str(self.renderer.cam.yPos))
+		file.write(str(self.renderer.cam.zoom))
+		file.write(str(self.maxIters))
+		file.write(str(self.juliacx))
+		file.write(str(self.juliacy))
+		file.write(str(self.fractal))
+		file.write(str(self.colorSlice))
+		file.write(str(self.renderer.colorProfile.profileName))
+		file.write(str(self.rampValue))
+		file.close()
+
+	def loadSettings(self):
+		self.ensurePath(App.get_running_app().path + '/saves/')
 
 
 class RenderScatter(Scatter):
@@ -170,9 +191,10 @@ class RootWidget(FloatLayout):
 		self.add_widget(self.scatter, index = 3)
 
 
-class RendererApp(App):
+class QuadRendererApp(App):
 	def build(self):
 		self.title = 'Quadtree Renderer'
+		self.path = str(self.user_data_dir)
 		return RootWidget()
 
 	def Quit(self):
@@ -180,4 +202,4 @@ class RendererApp(App):
 
 
 if __name__=="__main__":
-	RendererApp().run()
+	QuadRendererApp().run()

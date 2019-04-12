@@ -16,12 +16,14 @@
             Label:
                 text: 'Color Ramp Strength'
                 width: 80
+                height: 30
                 size_hint: (0.1, None)
             Slider:
                 min: .5
                 max: 10
                 value: 1
                 width: 80
+                height: 30
                 size_hint: (0.1, None)
                 on_touch_up: root.renderer.changeRamp(self.value)
         BoxLayout:
@@ -31,11 +33,13 @@
             Label:
                 text: 'Max IFF Iterations'
                 width: 80
+                height: 30
                 size_hint: (0.1, None)
             FloatInput:
                 multiline: False
                 text: '1000'
                 width: 80
+                height: 30
                 size_hint: (0.1, None)
                 on_text_validate: self.text = root.renderer.changeMaxIters(self.text)
         BoxLayout:
@@ -45,12 +49,14 @@
             Label:
                 text: 'Julia Set cx'
                 width: 80
+                height: 30
                 size_hint: (0.1, None)
             Slider:
                 min: -1
                 max: 1
                 value: .3
                 width: 80
+                height: 30
                 size_hint: (0.1, None)
                 on_touch_move: root.renderer.changeJuliacx(self.value)
                 on_touch_up: root.renderer.changeJuliacx(self.value)
@@ -61,12 +67,14 @@
             Label:
                 text: 'Julia Set cy'
                 width: 80
+                height: 30
                 size_hint: (0.1, None)
             Slider:
                 min: -1
                 max: 1
                 value: .5
                 width: 80
+                height: 30
                 size_hint: (0.1, None)
                 on_touch_move: root.renderer.changeJuliacy(self.value)
                 on_touch_up: root.renderer.changeJuliacy(self.value)
@@ -82,8 +90,12 @@
                 text: 'File'
                 mode: 'spinner'
                 width: 90
-                #ActionButton:
-                #    text: 'Open'
+                ActionButton:
+                    text: 'Save Settings'
+                    on_press: root.renderer.saveSettings()
+                ActionButton:
+                    text: 'Save Settings'
+                    on_press: root.renderer.loadSettings()
                 ActionButton:
                     text: 'Save Image'
                     on_press: root.renderer.saveImage()
