@@ -127,19 +127,19 @@ class RendererWidget(Widget):
 	def saveSettings(self):
 		self.ensurePath(App.get_running_app().path + '/saves/')
 		i = 0
-		while os.path.exists(App.get_running_app().path + '/saves/' + self.fractal + str(i) + '.png'):
+		while os.path.exists(App.get_running_app().path+'/saves/'+self.fractal+str(i)+'.qr'):
 			i += 1
-		file = open(App.get_running_app().path + '/saves/', 'w')
-		file.write(str(self.renderer.cam.xPos))
-		file.write(str(self.renderer.cam.yPos))
-		file.write(str(self.renderer.cam.zoom))
-		file.write(str(self.maxIters))
-		file.write(str(self.juliacx))
-		file.write(str(self.juliacy))
-		file.write(str(self.fractal))
-		file.write(str(self.colorSlice))
-		file.write(str(self.renderer.colorProfile.profileName))
-		file.write(str(self.rampValue))
+		file = open(App.get_running_app().path+'/saves/'+self.fractal+str(i)+'.qr', 'w')
+		file.write(str(self.renderer.cam.xPos) + '\n')
+		file.write(str(self.renderer.cam.yPos) + '\n')
+		file.write(str(self.renderer.cam.zoom) + '\n')
+		file.write(str(self.maxIters) + '\n')
+		file.write(str(self.juliacx) + '\n')
+		file.write(str(self.juliacy) + '\n')
+		file.write(str(self.fractal) + '\n')
+		file.write(str(self.renderer.colorSlice) + '\n')
+		file.write(str(self.renderer.colorProfile.profileName) + '\n')
+		file.write(str(self.rampValue) + '\n')
 		file.close()
 
 	def loadSettings(self):
