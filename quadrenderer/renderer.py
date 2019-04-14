@@ -3,9 +3,10 @@ import numpy as np
 import os
 import cv2
 import time
+import gc
 import sys
 sys.path.append("..")
-from quadrenderer import gradient, mandelbrot, cactus, julia
+from quadrenderer import gradient, mandelbrot, cactus, julia, profile
 
 class FullRenderer(): # a "traditional" per-pixel Mandelbrot renderer
 	def __init__(self, xRes = 512, yRes = 512, AA = 0, maxIters = 100):
@@ -298,23 +299,58 @@ class Camera(): # This class is responsible for handling the conversion from pix
 	def convertY(self, y): # convert a y coordinate from math to pixel space
 		return y*self.zoom/self.yRes-self.yPos
 
+@profile.profile
+def test(res = 512):
+	renderer = RealtimeQuadRenderer(res = res, AA = 8, maxIters = 1000)
+	renderer.begin()
+	while renderer.tick():
+		pass
+	renderer.updateImage()
+
+@profile.profile
+def test2(res = 512):
+	renderer = ScanRenderer(res = res, AA = 8, maxIters = 1000)
+	renderer.begin()
+	while renderer.tick():
+		pass
+	renderer.updateImage()
+
+@profile.profile
+def test3(res = 512):
+	renderer = RealtimeJuliaQuadRenderer(res = res, AA = 8, maxIters = 1000)
+	renderer.begin()
+	while renderer.tick():
+		pass
+	renderer.updateImage()
+
+@profile.profile
+def test4(res = 512):
+	renderer = JuliaScanRenderer(res = res, AA = 8, maxIters = 1000)
+	renderer.begin()
+	while renderer.tick():
+		pass
+	renderer.updateImage()
 
 if __name__ == "__main__":
-	if not os.path.exists('renders'):
-		os.makedirs('renders')
-	for res in (16, 32, 64, 128, 256, 512, 1024):
-		#renderer = RealtimeQuadRenderer(res = res, AA = 8, maxIters = 1000)
-		#renderer = ScanRenderer(res = res, AA = 8, maxIters = 1000)
-		#renderer = RealtimeJuliaQuadRenderer(res = res, AA = 8, maxIters = 1000)
-		#renderer = JuliaScanRenderer(res = res, AA = 8, maxIters = 1000)
-		#renderer = RealtimeCactusQuadRenderer(res = res, AA = 8, maxIters = 1000)
-		renderer = CactusScanRenderer(res = res, AA = 8, maxIters = 1000)
-		t = time.time()
-		renderer.begin()
-	
-		while renderer.tick():
-			pass
-	
-		renderer.updateImage()
-		print("Render time at " + str(res) + " "*(4-len(str(res))) + " was " + str(time.time() - t))
-		imageio.imwrite('renders/test' + str(res) + '.png', renderer.image)
+	test4(1024)
+
+
+#if __name__ == "__main__":
+#	if not os.path.exists('renders'):
+#		os.makedirs('renders')
+#	for res in (16, 32, 64, 128, 256, 512, 1024):
+#		#renderer = RealtimeQuadRenderer(res = res, AA = 8, maxIters = 1000)
+#		#renderer = ScanRenderer(res = res, AA = 8, maxIters = 1000)
+#		#renderer = RealtimeJuliaQuadRenderer(res = res, AA = 8, maxIters = 1000)
+#		#renderer = JuliaScanRenderer(res = res, AA = 8, maxIters = 1000)
+#		#renderer = RealtimeCactusQuadRenderer(res = res, AA = 8, maxIters = 1000)
+#		renderer = CactusScanRenderer(res = res, AA = 8, maxIters = 1000)
+#		t = time.time()
+#		renderer.begin()
+#	
+#		while renderer.tick():
+#			pass
+#	
+#		renderer.updateImage()
+#		print("Render time at " + str(res) + " "*(4-len(str(res))) + " was " + str(time.time() - t))
+#		imageio.imwrite('renders/test' + str(res) + '.png', renderer.image)
