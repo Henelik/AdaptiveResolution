@@ -187,6 +187,8 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 	def tick(self): # subdivide and update the highest priority quad
 		self.sortLimit -= 1
 		if self.sortLimit <= 0 or self.quadList[0].priority == 0:
+			if self.quadList[0].priority == 0:
+				self.quadList.pop(0)
 			self.quadList.sort(key = lambda q: int(q.priority), reverse = True)
 			self.sortLimit = len(self.quadList)//2
 		if self.quadList[0].priority == 0:
@@ -198,11 +200,13 @@ class RealtimeQuadRenderer(): # the realtime quadtree renderer
 		return True
 
 	def updateImage(self): # update the image (e.g. to display it while rendering)
+		#t = time.time()
 		for q in self.quadList:
 			if not q.updated:
 				c = self.colorProfile.convert(q.color/self.maxIters)
 				self.image[q.y:q.y+q.size, q.x:q.x+q.size] = np.append(c[self.colorSlice:], c[:self.colorSlice])
 				q.updated = True
+		#print(time.time() - t)
 
 	def fullUpdateImage(self): # update the entire image (e.g. when the color changes)
 		# This is a VERY expensive operation, and can take upwards of a second on a 1024x1024 image
@@ -299,6 +303,7 @@ class Camera(): # This class is responsible for handling the conversion from pix
 	def convertY(self, y): # convert a y coordinate from math to pixel space
 		return y*self.zoom/self.yRes-self.yPos
 
+
 @profile.profile
 def test(res = 512):
 	renderer = RealtimeQuadRenderer(res = res, AA = 8, maxIters = 1000)
@@ -332,25 +337,22 @@ def test4(res = 512):
 	renderer.updateImage()
 
 if __name__ == "__main__":
-	test4(1024)
-
-
-#if __name__ == "__main__":
-#	if not os.path.exists('renders'):
-#		os.makedirs('renders')
-#	for res in (16, 32, 64, 128, 256, 512, 1024):
-#		#renderer = RealtimeQuadRenderer(res = res, AA = 8, maxIters = 1000)
-#		#renderer = ScanRenderer(res = res, AA = 8, maxIters = 1000)
-#		#renderer = RealtimeJuliaQuadRenderer(res = res, AA = 8, maxIters = 1000)
-#		#renderer = JuliaScanRenderer(res = res, AA = 8, maxIters = 1000)
-#		#renderer = RealtimeCactusQuadRenderer(res = res, AA = 8, maxIters = 1000)
-#		renderer = CactusScanRenderer(res = res, AA = 8, maxIters = 1000)
-#		t = time.time()
-#		renderer.begin()
-#	
-#		while renderer.tick():
-#			pass
-#	
-#		renderer.updateImage()
-#		print("Render time at " + str(res) + " "*(4-len(str(res))) + " was " + str(time.time() - t))
-#		imageio.imwrite('renders/test' + str(res) + '.png', renderer.image)
+	if not os.path.exists('renders'):
+		os.makedirs('renders')
+	maxIters = 10000
+	for res in (16, 32, 64, 128, 256, 512, 1024):
+		#renderer = RealtimeQuadRenderer(res = res, AA = 8, maxIters = maxIters)
+		#renderer = ScanRenderer(res = res, AA = 8, maxIters = maxIters)
+		#renderer = RealtimeJuliaQuadRenderer(res = res, AA = 8, maxIters = maxIters)
+		#renderer = JuliaScanRenderer(res = res, AA = 8, maxIters = maxIters)
+		#renderer = RealtimeCactusQuadRenderer(res = res, AA = 8, maxIters = maxIters)
+		renderer = CactusScanRenderer(res = res, AA = 8, maxIters = maxIters)
+		t = time.time()
+		renderer.begin()
+	
+		while renderer.tick():
+			pass
+	
+		renderer.updateImage()
+		print("Render time at " + str(res) + " "*(4-len(str(res))) + " was " + str(time.time() - t))
+		imageio.imwrite('renders/test' + str(res) + '.png', renderer.image)
