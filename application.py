@@ -118,18 +118,18 @@ class RendererWidget(Widget):
 			os.makedirs(path)
 
 	def saveImage(self):
-		self.ensurePath(App.get_running_app().path + '/screenshots/')
+		self.ensurePath('screenshots/')
 		i = 0
-		while os.path.exists(App.get_running_app().path + '/screenshots/' + self.fractal + str(i) + '.png'):
+		while os.path.exists('screenshots/' + self.fractal + str(i) + '.png'):
 			i += 1
-		imageio.imwrite(App.get_running_app().path + '/screenshots/' + self.fractal + str(i) + '.png', self.renderer.image[::-1, :, ::-1])
+		imageio.imwrite('screenshots/' + self.fractal + str(i) + '.png', self.renderer.image[::-1, :, ::-1])
 
 	def saveSettings(self):
-		self.ensurePath(App.get_running_app().path + '/saves/')
+		self.ensurePath('saves/')
 		i = 0
-		while os.path.exists(App.get_running_app().path+'/saves/'+self.fractal+str(i)+'.qr'):
+		while os.path.exists('saves/'+self.fractal+str(i)+'.qr'):
 			i += 1
-		file = open(App.get_running_app().path+'/saves/'+self.fractal+str(i)+'.qr', 'w')
+		file = open('saves/'+self.fractal+str(i)+'.qr', 'w')
 		file.write(str(self.renderer.cam.xPos) + '\n')
 		file.write(str(self.renderer.cam.yPos) + '\n')
 		file.write(str(self.renderer.cam.zoom) + '\n')
