@@ -23,4 +23,3 @@ The fractals can be rendered with a color ramp, which converts the output of the
 # To Do:
  - Create a formula to control the iteration count and degree multiplier based on zoom
  - Add generalized iteration algorithm so users can input iterative functions without modifying code
- - Add full rendering within application (save image button)
