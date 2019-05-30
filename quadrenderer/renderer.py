@@ -1,4 +1,3 @@
-import imageio
 import numpy as np
 import os
 import cv2
@@ -355,4 +354,4 @@ if __name__ == "__main__":
 	
 		renderer.updateImage()
 		print("Render time at " + str(res) + " "*(4-len(str(res))) + " was " + str(time.time() - t))
-		imageio.imwrite('renders/test' + str(res) + '.png', renderer.image)
+		cv2.imwrite('renders/test' + str(res) + '.png', renderer.image)

@@ -11,7 +11,6 @@ setup(name='quadrenderer',
       install_requires=[
           'opencv-python',
           'kivy',
-          'imageio',
           'numpy',
           'numba',
       ],

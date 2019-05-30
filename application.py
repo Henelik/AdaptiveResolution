@@ -11,7 +11,7 @@ from kivy.graphics import Rectangle
 
 from quadrenderer.renderer import RealtimeQuadRenderer, RealtimeJuliaQuadRenderer, RealtimeCactusQuadRenderer, RealtimeGradientQuadRenderer, ScanRenderer
 
-import imageio
+import cv2
 import time
 import os
 import re
@@ -122,7 +122,7 @@ class RendererWidget(Widget):
 		i = 0
 		while os.path.exists('screenshots/' + self.fractal + str(i) + '.png'):
 			i += 1
-		imageio.imwrite('screenshots/' + self.fractal + str(i) + '.png', self.renderer.image[::-1, :, ::-1])
+		cv2.imwrite('screenshots/' + self.fractal + str(i) + '.png', self.renderer.image[::-1, :, ::-1])
 
 	def saveSettings(self):
 		self.ensurePath('saves/')

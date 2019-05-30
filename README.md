@@ -14,7 +14,6 @@ Just run the "run.bat" file in the root folder to start the application.
 The fractals can be rendered with a color ramp, which converts the output of the excape time algorithm to an the index of an image for coloration.  Any bitmap image can be added as a ramp to color fractals.
 
 # Package Dependencies:
- - imageio
  - Numba
  - Kivy
  - Numpy
