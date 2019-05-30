@@ -11,7 +11,7 @@ This repository also includes a Kivy application which allows users to interacti
 Just run the "run.bat" file in the root folder to start the application.
 
 # Color ramps
-The fractals can be rendered with a color ramp, which converts the output of the excape time algorithm to an the index of an image for coloration.  Any bitmap image can be added as a ramp to color fractals.
+The fractals can be rendered with a color ramp, which converts the integer output of the escape time algorithm to an index of an image for coloration.  Any bitmap image can be added as a ramp to color fractals (only the top row will be used).
 
 # Package Dependencies:
  - Numba
@@ -22,3 +22,4 @@ The fractals can be rendered with a color ramp, which converts the output of the
 # To Do:
  - Create a formula to control the iteration count and degree multiplier based on zoom
  - Add generalized iteration algorithm so users can input iterative functions without modifying code
+ - Add more fractals!
