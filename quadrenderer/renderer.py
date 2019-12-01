@@ -17,7 +17,7 @@ class FullRenderer(): # a "traditional" per-pixel Mandelbrot renderer
 		self.cam = Camera(xRes, yRes, xPos = -.5)
 
 	def render(self):
-		t = time.clock()
+		t = time.time()
 		image = np.zeros((self.xRes, self.yRes, 3), dtype=np.uint8)
 		for y in range(self.yRes):
 			for x in range(self.xRes):
@@ -26,9 +26,9 @@ class FullRenderer(): # a "traditional" per-pixel Mandelbrot renderer
 				for i in range(self.AA):
 					pix.append(self.renderPixel(self.cam.convertPos(AAList[i][0], AAList[i][1])))
 				col = sum(pix)
-				image[y][x] = (col, col, col)
+				image[x][y] = (col, col, col)
 
-		print("Render time was " + str(time.clock()-t) + " seconds.")
+		print("Render time was " + str(time.time()-t) + " seconds.")
 		return image
 
 	def renderPixel(self, coords):
@@ -336,6 +336,7 @@ def test4(res = 512):
 	renderer.updateImage()
 
 if __name__ == "__main__":
+	# test a renderer
 	if not os.path.exists('renders'):
 		os.makedirs('renders')
 	maxIters = 10000
